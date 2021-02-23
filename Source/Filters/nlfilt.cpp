@@ -8,7 +8,7 @@
 #define MAX_DELAY (1024)
 #define MAXAMP (FL(64000.0f))
 
-using namespace daisysp;
+using namespace daicsp;
 
 void NlFilt::Init()
 {

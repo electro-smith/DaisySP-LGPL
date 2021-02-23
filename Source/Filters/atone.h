@@ -5,7 +5,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** A first-order recursive high-pass filter with variable frequency response.
      Original Author(s): Barry Vercoe, John FFitch, Gabriel Maldonado
@@ -50,6 +50,6 @@ class ATone
     void  CalculateCoefficients();
     float out_, prevout_, in_, freq_, c2_, sample_rate_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

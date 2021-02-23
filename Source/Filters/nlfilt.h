@@ -5,7 +5,7 @@
 #include <stdint.h>
 #define DSY_NLFILT_MAX_DELAY 1024
 
-namespace daisysp
+namespace daicsp
 {
 /** Non-linear filter
     
@@ -75,6 +75,6 @@ class NlFilt
     float   delay_[DSY_NLFILT_MAX_DELAY];
     int32_t point_;
 };
-} // namespace daisysp
+} // namespace daicsp
 
 #endif

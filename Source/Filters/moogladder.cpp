@@ -1,7 +1,7 @@
 #include "moogladder.h"
 #include "dsp.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 float MoogLadder::my_tanh(float x)
 {

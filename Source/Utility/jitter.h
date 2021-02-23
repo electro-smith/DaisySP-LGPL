@@ -2,7 +2,7 @@
 #ifndef DAISY_JITTER
 #define DAISY_JITTER
 
-namespace daisysp
+namespace daicsp
 {
 /** Randomly segmented line generator \n 
 
@@ -54,6 +54,6 @@ class Jitter
     float   biRandGab();
     void    Reset();
 };
-} // namespace daisysp
+} // namespace daicsp
 
 #endif

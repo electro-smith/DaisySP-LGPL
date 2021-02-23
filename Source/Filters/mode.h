@@ -2,7 +2,7 @@
 #ifndef DAISY_MODE
 #define DAISY_MODE
 
-namespace daisysp
+namespace daicsp
 {
 /** Resonant Modal Filter
 
@@ -48,6 +48,6 @@ class Mode
     float xnm1_, ynm1_, ynm2_, a0_, a1_, a2_;
     float d_, lfq_, lq_, sr_;
 };
-} // namespace daisysp
+} // namespace daicsp
 
 #endif

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** fold module
 
@@ -39,6 +39,6 @@ class Fold
     float incr_, index_, value_;
     int   sample_index_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

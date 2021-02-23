@@ -5,7 +5,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** Moog ladder filter module
 
@@ -45,6 +45,6 @@ class MoogLadder
         sample_rate_, old_acr_, old_tune_;
     float my_tanh(float x);
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

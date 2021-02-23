@@ -3,7 +3,7 @@
 #define DSY_PHASOR_H
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** Generates a normalized signal moving from 0-1 at the specified frequency.
 
@@ -58,6 +58,6 @@ class Phasor
     float freq_;
     float sample_rate_, inc_, phs_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

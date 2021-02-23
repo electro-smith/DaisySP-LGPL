@@ -1,7 +1,7 @@
 #include "allpass.h"
 #include <math.h>
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Allpass::Init(float sample_rate, float* buff, size_t size)
 {

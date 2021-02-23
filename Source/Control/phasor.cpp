@@ -2,7 +2,7 @@
 #include "phasor.h"
 #include "dsp.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Phasor::SetFreq(float freq)
 {

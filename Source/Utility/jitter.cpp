@@ -11,7 +11,7 @@
 #define FT_PHMASK 0x0FFFFFFL
 #endif
 
-using namespace daisysp;
+using namespace daicsp;
 
 
 float Jitter::randGab()

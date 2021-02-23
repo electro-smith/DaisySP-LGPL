@@ -5,7 +5,7 @@
 
 #include "Utility/dsp.h"
 
-namespace daisysp
+namespace daicsp
 {
 /** Comb filter module
 
@@ -55,7 +55,7 @@ class Comb
     float* buf_;
     size_t buf_pos_, mod_, max_size_;
 };
-} // namespace daisysp
+} // namespace daicsp
 
 #endif
 #endif

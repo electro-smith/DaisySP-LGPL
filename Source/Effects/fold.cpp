@@ -1,7 +1,7 @@
 #include "fold.h"
 #include <math.h>
 
-using namespace daisysp;
+using namespace daicsp;
 
 
 void Fold::Init()

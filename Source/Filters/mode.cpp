@@ -20,7 +20,7 @@
 
 #include "mode.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Mode::Init(float sample_rate)
 {

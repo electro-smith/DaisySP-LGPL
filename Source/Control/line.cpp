@@ -1,6 +1,6 @@
 #include "line.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Line::Init(float sample_rate)
 {

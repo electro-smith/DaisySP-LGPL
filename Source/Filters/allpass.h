@@ -9,7 +9,7 @@
 
 /** @file allpass.h */
 
-namespace daisysp
+namespace daicsp
 {
 /**  
        Allpass filter module \n 
@@ -55,6 +55,6 @@ class Allpass
     float* buf_;
     int    buf_pos_, mod_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

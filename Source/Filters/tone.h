@@ -5,7 +5,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** A first-order recursive low-pass filter with variable frequency response.
 */
@@ -44,6 +44,6 @@ class Tone
     void  CalculateCoefficients();
     float out_, prevout_, in_, freq_, c1_, c2_, sample_rate_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

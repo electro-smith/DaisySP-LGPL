@@ -5,7 +5,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** Two pole recursive filter
 
@@ -56,6 +56,6 @@ class Biquad
         two_pi_d_sr_, xnm1_, xnm2_, ynm1_, ynm2_;
     void Reset();
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

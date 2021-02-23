@@ -7,7 +7,7 @@
 #define INTERPFACTOR 256.0f
 #define INTERPFACTOR_I 255
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Pluck::Reinit()
 {

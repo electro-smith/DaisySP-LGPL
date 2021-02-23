@@ -6,7 +6,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** Balances two sound sources. Sig is boosted to the level of comp.
 
@@ -42,6 +42,6 @@ class Balance
   private:
     float sample_rate_, ihp_, c2_, c1_, prvq_, prvr_, prva_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

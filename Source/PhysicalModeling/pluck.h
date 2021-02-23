@@ -6,7 +6,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** The method of natural decay that the algorithm will use.
     - RECURSIVE: 1st order recursive filter, with coefs .5.
@@ -95,6 +95,6 @@ class Pluck
     char    init_;
     int32_t mode_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

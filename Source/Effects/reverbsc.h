@@ -4,7 +4,7 @@
 
 #define DSY_REVERBSC_MAX_SIZE 98936
 
-namespace daisysp
+namespace daicsp
 {
 /**Delay line for internal reverb use
 */
@@ -69,5 +69,5 @@ class ReverbSc
 };
 
 
-} // namespace daisysp
+} // namespace daicsp
 #endif

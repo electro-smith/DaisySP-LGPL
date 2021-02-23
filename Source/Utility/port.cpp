@@ -8,7 +8,7 @@
 
 #include "port.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Port::Init(float sample_rate, float htime)
 {

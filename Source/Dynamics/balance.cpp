@@ -2,7 +2,7 @@
 #include <math.h>
 #include "dsp.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void Balance::Init(float sample_rate)
 {

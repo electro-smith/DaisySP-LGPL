@@ -1,4 +1,4 @@
-/** Helpful defines, functions, and other utilities for use in/with daisysp modules.
+/** Helpful defines, functions, and other utilities for use in/with DaiCsP modules.
 */
 #pragma once
 #ifndef DSY_CORE_DSP
@@ -14,7 +14,7 @@
 #define DSY_MAX(in, mx) (in > mx ? in : mx)
 #define DSY_CLAMP(in, mn, mx) (DSY_MIN(DSY_MAX(in, mn), mx))
 
-namespace daisysp
+namespace daicsp
 {
 /** efficient floating point min/max
 c/o stephen mccaul
@@ -48,7 +48,7 @@ inline float fclamp(float in, float min, float max)
     return fmin(fmax(in, min), max);
 }
 
-} // namespace daisysp
+} // namespace daicsp
 #endif
 
 #ifdef DSY_CUSTOM_DSP

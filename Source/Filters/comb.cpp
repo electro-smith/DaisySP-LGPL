@@ -1,7 +1,7 @@
 #include "comb.h"
 #include <math.h>
 
-using namespace daisysp;
+using namespace daicsp;
 
 static float log001 = -6.9078f; // log .001
 

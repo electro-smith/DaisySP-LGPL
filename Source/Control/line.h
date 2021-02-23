@@ -4,7 +4,7 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** creates a Line segment signal
     */
@@ -34,6 +34,6 @@ class Line
     float   inc_, val_, sample_rate_;
     uint8_t finished_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif

@@ -4,7 +4,7 @@
 #define DSY_PORT_H
 #ifdef __cplusplus
 
-namespace daisysp
+namespace daicsp
 {
 /** Applies portamento to an input signal. 
 
@@ -52,6 +52,6 @@ class Port
     float c1_, c2_, yt1_, prvhtim_;
     float sample_rate_, onedsr_;
 };
-} // namespace daisysp
+} // namespace daicsp
 #endif
 #endif
