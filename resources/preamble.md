@@ -1,6 +1,6 @@
 ---
 title:
-- DaisySP
+- DaiCsP
 
 manufacturer:
 - electrosmith
