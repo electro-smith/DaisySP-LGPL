@@ -43,5 +43,5 @@ The CMakeLists.txt and Makefile should require some editing but will still work.
 
 ## Other
 
-Keep in mind there are a few open PRs on DaisySP that I will merge before this goes public so we'll want to update those.
+Keep in mind there are a few open PRs on DaisySP that I will merge before this goes public so we'll want to keep track of that so this isn't out of date as soon as it goes public (reverbsc cmake lists, etc.)
 
