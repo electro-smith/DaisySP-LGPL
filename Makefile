@@ -1,4 +1,4 @@
-TARGET = libdaisysp
+TARGET = libdaicsp
 
 MODULE_DIR = Source
 

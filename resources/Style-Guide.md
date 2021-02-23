@@ -13,7 +13,7 @@
     - [enum definitions\*](#enum-definitions)
 - [Misc.](#misc)
 - [Example](#Example-files)
-    - [daisysp module](#daisysp-module)
+    - [daicsp module](#daicsp-module)
 
 \* still being discussed, not strictly followed yet.
 
@@ -179,7 +179,7 @@ Naming convention for the header guards should be:
 
 ## Example files
 
-### DaisySP module
+### DaiCsP module
 
 Header:
 ```C++
@@ -192,7 +192,7 @@ Header:
 #ifndef DSY_MODULENAME_H
 #define DSY_MODULENAME_H
 
-namespace daisysp
+namespace daicsp
 {
 
 enum state
@@ -224,7 +224,7 @@ class ModuleName
 
 };
 
-} // namespace daisysp
+} // namespace daicsp
 
 #endif // DSY_MODULENAME_H
 
@@ -235,7 +235,7 @@ Implementation:
 #include <system_include.h>
 #include "modulename.h"
 
-using namespace daisysp;
+using namespace daicsp;
 
 void ModuleName::Init()
 {

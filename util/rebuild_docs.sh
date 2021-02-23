@@ -1,5 +1,5 @@
 #!/bin/bash
-daisysp_dir=./
+daicsp_dir=./
 
 # create folder
 mkdir -p doc
@@ -9,7 +9,7 @@ echo "Creating doxygen documentation"
 doxygen Doxyfile > /dev/null
 
 # Generate reference manual PDF
-reference_manual_pdf_name=doc/daisysp_reference.pdf
+reference_manual_pdf_name=doc/daicsp_reference.pdf
 doxygen_latex_dir=doc/latex
 doxygen_latex_outfile=doc/latex/refman.pdf
 if ! [ -x "$(command -v pdflatex)" ]; then

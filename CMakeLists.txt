@@ -52,8 +52,8 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/Utility)
 
 set(CMAKE_CXX_STANDARD 14)
 
-ADD_LIBRARY( DaisySP STATIC 
+ADD_LIBRARY( DaiCsP STATIC 
     ${SOURCE_FILES} 
     ${HEADER_FILES} 
-    Source/daisysp.h )
+    Source/daicsp.h )
 
