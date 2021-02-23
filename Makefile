@@ -8,39 +8,17 @@ MODULE_DIR = Source
 
 CONTROL_MOD_DIR = Control
 CONTROL_MODULES = \
-adenv \
-adsr \
 line \
 phasor
-
-DRUM_MOD_DIR = Drums
-DRUM_MODULES = \
-analogbassdrum \
-analogsnaredrum \
-hihat \
-synthbassdrum \
-synthsnaredrum
 
 DYNAMICS_MOD_DIR = Dynamics
 DYNAMICS_MODULES = \
 balance \
-compressor \
-crossfade \
-limiter 
 
 EFFECTS_MOD_DIR = Effects
 EFFECTS_MODULES = \
-autowah \
-bitcrush \
-chorus \
-decimator \
-flanger \
 fold \
-overdrive \
 reverbsc \
-sampleratereducer \
-tremolo 
-#pitchshifter 
 
 FILTER_MOD_DIR = Filters
 FILTER_MODULES = \
@@ -51,65 +29,26 @@ comb \
 mode \
 moogladder \
 nlfilt \
-svf \
 tone 
-
-NOISE_MOD_DIR = Noise
-NOISE_MODULES = \
-clockednoise \
-grainlet \
-particle 
-#dust 
-#fractal_noise 
-#whitenoise
 
 PHYSICAL_MODELING_MOD_DIR = PhysicalModeling
 PHYSICAL_MODELING_MODULES = \
-drip \
-modalvoice \
 pluck \
-KarplusString \
-resonator \
-stringvoice 
-#PolyPluck 
-
-SYNTHESIS_MOD_DIR = Synthesis
-SYNTHESIS_MODULES = \
-blosc \
-fm2 \
-formantosc \
-oscillator \
-oscillatorbank \
-variablesawosc \
-variableshapeosc \
-vosim \
-zoscillator 
-#harmonic_osc 
 
 UTILITY_MOD_DIR = Utility
 UTILITY_MODULES = \
-dcblock \
 jitter \
-metro \
 port 
-#delayline 
-#dsp 
-#maytrig 
-#samplehold 
-#smooth_random
 
 ######################################
 # source
 ######################################
 
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(CONTROL_MOD_DIR)/$(CONTROL_MODULES))
-CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(DRUM_MOD_DIR)/$(DRUM_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(DYNAMICS_MOD_DIR)/$(DYNAMICS_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(EFFECTS_MOD_DIR)/$(EFFECTS_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(FILTER_MOD_DIR)/$(FILTER_MODULES))
-CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(NOISE_MOD_DIR)/$(NOISE_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(PHYSICAL_MODELING_MOD_DIR)/$(PHYSICAL_MODELING_MODULES))
-CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(SYNTHESIS_MOD_DIR)/$(SYNTHESIS_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(UTILITY_MOD_DIR)/$(UTILITY_MODULES))
 
 ######################################
@@ -185,13 +124,10 @@ C_DEFS =  \
 C_INCLUDES = \
 -I$(MODULE_DIR) \
 -I$(MODULE_DIR)/$(CONTROL_MOD_DIR) \
--I$(MODULE_DIR)/$(DRUM_MOD_DIR) \
 -I$(MODULE_DIR)/$(DYNAMICS_MOD_DIR) \
 -I$(MODULE_DIR)/$(EFFECTS_MOD_DIR) \
 -I$(MODULE_DIR)/$(FILTER_MOD_DIR) \
--I$(MODULE_DIR)/$(NOISE_MOD_DIR) \
 -I$(MODULE_DIR)/$(PHYSICAL_MODELING_MOD_DIR) \
--I$(MODULE_DIR)/$(SYNTHESIS_MOD_DIR) \
 -I$(MODULE_DIR)/$(UTILITY_MOD_DIR) 
 
 # compile gcc flags
