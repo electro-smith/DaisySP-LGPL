@@ -387,7 +387,7 @@
     <ClInclude Include="..\Source\Utility\smooth_random.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\daisysp.h" />
+    <ClInclude Include="..\Source\daicsp.h" />
     <ClInclude Include="..\Source\Effects\chorus.h">
       <Filter>Effects</Filter>
     </ClInclude>

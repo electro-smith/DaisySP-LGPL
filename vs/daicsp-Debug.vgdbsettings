@@ -20,7 +20,7 @@
         <Revision>2</Revision>
       </Version>
     </ToolchainID>
-    <ProjectFile>daisysp.vcxproj</ProjectFile>
+    <ProjectFile>daicsp.vcxproj</ProjectFile>
     <RemoteBuildEnvironment>
       <Records />
     </RemoteBuildEnvironment>

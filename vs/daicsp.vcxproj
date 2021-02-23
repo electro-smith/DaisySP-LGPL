@@ -134,7 +134,7 @@
     <ClInclude Include="..\Source\Control\adsr.h" />
     <ClInclude Include="..\Source\Control\line.h" />
     <ClInclude Include="..\Source\Control\phasor.h" />
-    <ClInclude Include="..\Source\daisysp.h" />
+    <ClInclude Include="..\Source\daicsp.h" />
     <ClInclude Include="..\Source\Drums\analogbassdrum.h" />
     <ClInclude Include="..\Source\Drums\analogsnaredrum.h" />
     <ClInclude Include="..\Source\Drums\hihat.h" />
