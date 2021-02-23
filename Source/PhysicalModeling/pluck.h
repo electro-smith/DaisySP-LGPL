@@ -21,7 +21,7 @@ enum
 
 /** Produces a naturally decaying plucked string or drum sound based on the Karplus-Strong algorithms.
 
-    Ported from soundpipe to DaisySP
+    Ported from csound to DaisySP
     
     This code was originally extracted from the Csound opcode "pluck"
 

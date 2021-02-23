@@ -1,10 +1,8 @@
 //
 // Mode
 //
-// This code has been extracted from the soundpipe opcode "mode".
+// This code has been extracted from the csound opcode "mode".
 // It has been modified to work as a Daisy module.
-//
-// Originally extracted from Csound.
 //
 // Original Author(s): Francois Blanc, Steven Yi
 // Year: 2001

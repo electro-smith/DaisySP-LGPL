@@ -6,15 +6,15 @@ namespace daisysp
 {
 /** Resonant Modal Filter
 
-    Extracted from soundpipe to work as a Daisy Module,
-
-    originally extracted from csound by Paul Batchelor.
+    Extracted from csound to work as a Daisy Module,
 
     Original Author(s): Francois Blanc, Steven Yi
 
     Year: 2001
 
     Location: Opcodes/biquad.c (csound)
+
+	Ported by: Stephen Hensley
 */
 class Mode
 {

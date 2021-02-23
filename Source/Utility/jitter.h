@@ -5,7 +5,9 @@
 namespace daisysp
 {
 /** Randomly segmented line generator \n 
-    Originally extracted from csound by Paul Batchelor.\n 
+
+	Originally from Csound
+
     Ported by Ben Sergentanis, June 2020
 
     @author Gabriel Maldonado

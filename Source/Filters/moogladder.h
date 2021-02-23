@@ -9,7 +9,7 @@ namespace daisysp
 {
 /** Moog ladder filter module
 
-Ported from soundpipe
+Ported from csound
 
 Original author(s) : Victor Lazzarini, John ffitch (fast tanh), Bob Moog
 

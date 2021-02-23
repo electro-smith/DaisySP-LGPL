@@ -14,7 +14,7 @@ namespace daisysp
 /**  
        Allpass filter module \n 
        Passes all frequencies at their original levels, with a phase shift. \n 
-       Ported from soundpipe by Ben Sergentanis, May 2020 
+       Ported from csound by Ben Sergentanis, May 2020 
        @author Barry Vercoe, John ffitch
        @date 1991
 */

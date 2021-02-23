@@ -24,13 +24,11 @@ typedef struct
 
 /** Stereo Reverb
 
-Reverb SC:               Ported from csound/soundpipe
+Reverb SC:               Ported from csound
 
 Original author(s):        Sean Costello, Istvan Varga
 
 Year:                    1999, 2005
-
-Ported to soundpipe by:  Paul Batchelor
 
 Ported by:                Stephen Hensley
 */

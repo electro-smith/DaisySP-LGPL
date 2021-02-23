@@ -14,7 +14,7 @@ namespace daisysp
 
     *Year: 1991
 
-    *Ported from soundpipe by Ben Sergentanis, May 2020
+    *Ported from csound by Ben Sergentanis, May 2020
 */
 class Balance
 {

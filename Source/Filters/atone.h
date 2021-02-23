@@ -14,7 +14,7 @@ namespace daisysp
 
      Original Location: Csound -- OOps/ugens5.c
 
-     Ported from soundpipe by Ben Sergentanis, May 2020
+     Ported from csound by Ben Sergentanis, May 2020
     */
 class ATone
 {

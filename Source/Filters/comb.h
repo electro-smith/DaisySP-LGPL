@@ -11,7 +11,7 @@ namespace daisysp
 
     Original author(s) :
 
-    Ported from soundpipe by Ben Sergentanis, May 2020
+    Ported from csound by Ben Sergentanis, May 2020
 */
 class Comb
 {

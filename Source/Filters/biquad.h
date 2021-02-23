@@ -13,7 +13,7 @@ namespace daisysp
 
     Year: 1998
 
-    Ported from soundpipe by Ben Sergentanis, May 2020
+    Ported from csound by Ben Sergentanis, May 2020
 */
 class Biquad
 {
