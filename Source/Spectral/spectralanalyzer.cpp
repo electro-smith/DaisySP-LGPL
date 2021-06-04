@@ -2,63 +2,75 @@
 #include <string.h>
 #include "dsp.h"
 #include "spectralanalyzer.h"
-
+// #include "shy_fft.h"
 
 using namespace daicsp;
 
-void SpectralAnalyzer::Init()
+void SpectralAnalyzer::Init(float sampleRate)
 {
     // Set private members to defaults
-
+    sr_ = sampleRate;
     // Do stuff
-    
+    fft_.Init();
 }
 
-float SpectralAnalyzer::Process(const float &in)
+void SpectralAnalyzer::Process(const float* in, size_t size, SpectralBuffer &fsig)
 {
-    float *ain;
-    unsigned int offset = h.insdshead->ksmps_offset;
-    unsigned int early  = h.insdshead->ksmps_no_end;
-    unsigned int i, nsmps = CS_KSMPS;
 
-    ain = ain;
+    // I believe N is used for the number of bins.
+    if (fsig.N > FFT::MAX_SIZE)
+    {
+      // TODO -- call error here
+    }
+
+    // float *ain;
+    // unsigned int offset = h.insdshead->ksmps_offset;
+    // unsigned int early  = h.insdshead->ksmps_no_end;
+    // unsigned int i, nsmps = CS_KSMPS;
+    unsigned int early = 0;
+    unsigned int offset = 0;
+    unsigned int i, nsmps = size;
+
+    // ain = ain;
 
     // TODO -- error reporting
     // if (input.auxp==NULL) {
     //   return csound->PerfError(csound,&(h),
     //                            Str("pvsanal: Not Initialised.\n"));
     // }
-    {
-      // overlap is a pointer to a buffer, so no need to cast?
-      int32_t overlap = (int32_t)*overlap;
-      if (overlap<(int32_t)nsmps || overlap<10) /* 10 is a guess.... */
-        // TODO -- this paradigm will have to be modified to fit here
-        return Analyze();
+    // overlap is a pointer to a buffer, so no need to cast?
+    int over = (int)*overlap;
+    // This seems backwards -- shouldn't it tick when it's still collecting samples?
+    if (over<(int)nsmps || over<10) {
+      Analyze(size);
+    } else {
+      nsmps -= early;
+
+      for (i=offset; i < nsmps; i++)
+        Tick(ain[i]);
     }
-    nsmps -= early;
-    // Since we expect nsmps to always be 1 (one Process for each sample),
-    // this can probably just be ignored and always run as Tick(whatever);
-    for (i=offset; i < nsmps; i++)
-      Tick(ain[i]);
-    return OK;
 }
 
-void SpectralAnalyzer::Analyze(float sample)
+void SpectralAnalyzer::Analyze(size_t size)
 {
     float *ain;
-    int32_t NB = Ii, loc;
-    int32_t N = fsig->N;
-    float *data = (float*)(input.auxp);
-    Complex *fw = (Complex*)(analwinbuf.auxp);
+    int NB = Ii, loc;
+    int N = fsig->N;
+    float *data = input;
+    Complex *fw = (Complex*) analwinbuf; // casting this regular float buffer to complex values is annoying
     float *c = cosine;
     float *s = sine;
-    float *h = (float*)oldInPhase.auxp;
+    float *h = oldInPhase;
 
     // TODO -- make these csound values work with daisy syntax
-    unsigned int offset = h.insdshead->ksmps_offset;
-    unsigned int early  = h.insdshead->ksmps_no_end;
-    unsigned int i, nsmps = CS_KSMPS; // TODO -- make samples property
-    int32_t wintype = fsig->wintype;
+    // unsigned int offset = h.insdshead->ksmps_offset;
+    // unsigned int early  = h.insdshead->ksmps_no_end;
+
+    unsigned int offset = 0;
+    unsigned int early = 0;
+    // unsigned int i, nsmps = CS_KSMPS;
+    unsigned int i, nsmps = size;
+    int wintype = fsig->wintype;
 
     // TODO -- shall we include error handling?
     // if (data==NULL) {
@@ -72,13 +84,15 @@ void SpectralAnalyzer::Analyze(float sample)
     for (i=offset; i < nsmps; i++) {
       float re, im, dx;
       Complex* ff;
-      int32_t j;
+      int j;
 
 /*       printf("%d: in = %f\n", i, *ain); */
       dx = *ain - data[loc];    /* Change in sample */
       data[loc] = *ain++;       /* Remember input sample */
       /* get the frame for this sample */
-      ff = (Complex*)(fsig->frame.auxp) + i*NB;
+
+      // TODO -- is this always a set of complex numbers? if so, just declare it as complex, no?
+      ff = (Complex*)(fsig->frame) + i*NB;
       /* fw is the current frame at this sample */
       for (j = 0; j < NB; j++) {
         float ci = c[j], si = s[j];
@@ -266,18 +280,18 @@ void SpectralAnalyzer::Analyze(float sample)
     }
 
     inptr = loc;
-    return OK;
+    // return OK;
 }
 
 void SpectralAnalyzer::Tick(float sample) 
 {
     // TODO -- convert overlapbuf to regular float buffer
-    float *inbuf = (float *) overlapbuf.auxp;
+    float *inbuf = overlapbuf;
 
     // This is an implicit test to see if inbuf is full.
     // This is probably not good practice.
     if (inptr == fsig->overlap) {
-      UpdateBuffer();
+      UpdateFrame();
       fsig->framecount++;
       inptr = 0;
     }
@@ -286,7 +300,7 @@ void SpectralAnalyzer::Tick(float sample)
     inbuf[inptr++] = sample;
 }
 
-void SpectralAnalyzer::UpdateBuffer()
+void SpectralAnalyzer::UpdateFrame()
 {
     int got, tocp,i,j,k,ii;
     int N = fsig->N;
@@ -296,16 +310,17 @@ void SpectralAnalyzer::UpdateBuffer()
     int synWinLen = analWinLen;
     float *ofp;                 /* RWD MUST be 32bit */
     float *fp;
-    float *anal = (float *) (analbuf.auxp);
-    float *input = (float *) (input.auxp);
-    float *analWindow = (float *) (analwinbuf.auxp) + analWinLen;
-    float *oldInPhase = (float *) (oldInPhase.auxp);
+    float *anal = analbuf;
+    float *analOut = analbufOut;
+    float *tempInput = input;
+    float *analWindow = analwinbuf + analWinLen;
+    float *tempOldInPhase = oldInPhase;
     float angleDif,real,imag,phase;
     float rratio;
 
     got = fsig->overlap;      /*always assume */
-    fp = (float *) (overlapbuf.auxp);
-    tocp = (got<= input + buflen - nextIn ? got : input + buflen - nextIn);
+    fp = overlapbuf;
+    tocp = (got<= tempInput + buflen - nextIn ? got : tempInput + buflen - nextIn);
     got -= tocp;
     while (tocp-- > 0)
       *(nextIn++) = *fp++;
@@ -315,7 +330,7 @@ void SpectralAnalyzer::UpdateBuffer()
       while (got-- > 0)
         *nextIn++ = *fp++;
     }
-    if (nextIn >= (input + buflen))
+    if (nextIn >= (tempInput + buflen))
       nextIn -= buflen;
 
     /* analysis: The analysis subroutine computes the complex output at
@@ -346,36 +361,40 @@ void SpectralAnalyzer::UpdateBuffer()
       if (++k >= N)
         k -= N;
       /* *(anal + k) += *(analWindow + i) * *(input + j); */
-      anal[k] += analWindow[i] * input[j];
+      anal[k] += analWindow[i] * tempInput[j];
     }
-    if (!(N & (N - 1))) {
-      /* csound->RealFFT(csound, anal, N);*/
-      csound->RealFFT2(csound,setup,anal);
-      anal[N] = anal[1];
-      anal[1] = anal[N + 1] = 0.0f;
-    }
-    else
-      csound->RealFFTnp2(csound, anal, N);
+    // if (!(N & (N - 1))) { // NOTE -- if N is a power of two (including 2^0)
+    //   /* csound->RealFFT(csound, anal, N);*/
+    //   csound->RealFFT2(csound,setup,anal);
+    //   anal[N] = anal[1];
+    //   anal[1] = anal[N + 1] = 0.0f;
+    // }
+    // else
+    //   csound->RealFFTnp2(csound, anal, N);
+    
+    fft_.Direct(anal, analOut, N);
+    Interlace(analOut, N);
+
     /* conversion: The real and imaginary values in anal are converted to
        magnitude and angle-difference-per-second (assuming an
        intermediate sampling rate of rIn) and are returned in
        anal. */
 
     /*if (format==PVS_AMP_FREQ) {*/
-    for (i=ii=0    /*,i0=anal,i1=anal+1,oi=oldInPhase*/;
+    for (i=ii=0    /*,i0=anal,i1=anal+1,oi=tempOldInPhase*/;
          i <= N2;
          i++,ii+=2 /*i0+=2,i1+=2, oi++*/) {
-      real = anal[ii] /* *i0 */;
-      imag = anal[ii+1] /* *i1 */;
-      /**i0*/ anal[ii] = hypotf(real, imag);
+      real = analOut[ii] /* *i0 */;
+      imag = analOut[ii+1] /* *i1 */;
+      /**i0*/ analOut[ii] = hypotf(real, imag);
       /* phase unwrapping */
       /*if (*i0 == 0.)*/
-      if (/* *i0 */ anal[ii] < 1.0E-10f)
+      if (/* *i0 */ analOut[ii] < 1.0E-10f)
         angleDif = 0.0f;
       else {
         rratio =  atan2((float)imag,(float)real);
-        angleDif  = (phase = (float)rratio) - /**oi*/ oldInPhase[i];
-        /* *oi */ oldInPhase[i] = phase;
+        angleDif  = (phase = (float)rratio) - /**oi*/ tempOldInPhase[i];
+        /* *oi */ tempOldInPhase[i] = phase;
       }
 
       if (angleDif > PI_F)
@@ -384,13 +403,13 @@ void SpectralAnalyzer::UpdateBuffer()
         angleDif = angleDif + TWOPI_F;
 
       /* add in filter center freq.*/
-      /* *i1 */ anal[ii+1]  = angleDif * RoverTwoPi + ((float) i * Fexact);
+      /* *i1 */ analOut[ii+1]  = angleDif * RoverTwoPi + ((float) i * Fexact);
 
     }
     /* } */
     /* else must be PVOC_COMPLEX */
-    fp = anal;
-    ofp = (float *) (fsig->frame.auxp);      /* RWD MUST be 32bit */
+    fp = analOut;
+    ofp = (float *) (fsig->frame);      /* RWD MUST be 32bit */
     for (i=0;i < N+2;i++)
       /* *ofp++ = (float)(*fp++); */
       ofp[i] = (float) fp[i];
@@ -413,14 +432,16 @@ void SpectralAnalyzer::UpdateBuffer()
     IOi = Ii;
 }
 
-float SpectralAnalyzer::mod2Pi(float value) {
-    value = fmod(value,TWOPI_F);
-    if (value <= -PI_F) {
-        return value + TWOPI_F;
-    }
-    else if (value > PI_F) {
-        return value - TWOPI_F;
-    }
-    else
-      return value;
+void SpectralAnalyzer::Interlace(float* fftSeparated, const int length) {
+  // unfortunately, interleaving in place is not trivial, so another buffer will have to do
+  int halflen = length / 2;
+  for (int i = 0; i < halflen; i++) {
+    swapBuffer_[i*2] = fftSeparated[i];
+    swapBuffer_[i*2 + 1] = fftSeparated[i + halflen];
+  }
+
+  for (int i = 0; i < length; i++) {
+    fftSeparated[i] = swapBuffer_[i];
+  }
+
 }

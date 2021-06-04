@@ -3,6 +3,7 @@
 #define DSY_SPECTRALANALYZER_H
 
 #include "spectral.h"
+#include "shy_fft.h"
 
 namespace daicsp
 {
@@ -13,31 +14,36 @@ namespace daicsp
  *  
  *  Ported from Csound pvs opcodes.
  */
+
 class SpectralAnalyzer
 {
     public:
         SpectralAnalyzer () {}
         ~SpectralAnalyzer () {}
 
+        enum FFT {
+            MAX_SIZE = 4096,
+        };
+
         /** Initializes the SpectralAnalyzer module.
          *  \param p - description
          */
-        void Init();
+        void Init(float sampleRate);
 
         /** Processes a single sample and returns it.
          *  \param in - input sample
          */
-        float Process(const float &in); // pvsanal (?)
+        void Process(const float* in, size_t size, SpectralBuffer &fsig); // pvsanal (?)
 
         // TODO -- documentation and proper return types
         // NOTE -- these can be a private methods, right?
-        void Analyze(float sample); // pvssanal
+        void Analyze(size_t size); // pvssanal
 
         void Tick(float sample); // anal_tick
 
-        void UpdateBuffer(); // generate_frame
+        void UpdateFrame(); // generate_frame
 
-        float mod2Pi(float value); // mod2Pi
+        void Interlace(float* fftSeparated, int length);
 
 
     private:
@@ -61,14 +67,24 @@ class SpectralAnalyzer
         int     inptr;
 
         // TODO -- these can probably just be float arrays
-        AUXCH   input;
-        AUXCH   overlapbuf;
-        AUXCH   analbuf;
-        AUXCH   analwinbuf;     /* prewin in SDFT case */
-        AUXCH   oldInPhase;
-        AUXCH   trig;
+        float*   input;
+        float*   overlapbuf;
+        float*   analbuf;
+        float*   analbufOut;
+        float*   analwinbuf;     /* prewin in SDFT case */
+        float*   oldInPhase;
+        float*   trig;
         float   *cosine, *sine; // If floats aren't enough quality, return to doubles
-        void    *setup; // this is a struct for Csound's FFT implementation
+        // void    *setup; // this is a struct for Csound's FFT implementation
+        ShyFFT<float, FFT::MAX_SIZE> fft_;
+
+        float sr_;
+
+        // TODO -- ideally, no swapping would be necessary
+        float* swapBuffer_;
+
+        // property to keep track of running input length
+        int runningLength_;
         
 };
 

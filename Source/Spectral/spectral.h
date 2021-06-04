@@ -34,7 +34,7 @@ typedef struct {
     int wintype;
     int format;
     unsigned int framecount;
-    AUXCH frame;
+    float* frame;
 } SpectralBuffer;
 
 
@@ -42,6 +42,9 @@ typedef struct {
     float a;
     float b;
 } Complex;
+
+
+float mod2Pi(float value);
 
 
 } // namespace daicsp
