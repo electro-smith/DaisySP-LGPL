@@ -53,7 +53,7 @@ void SpectralAnalyzer::Process(const float* in, size_t size, SpectralBuffer &fsi
 
 void SpectralAnalyzer::Analyze(size_t size)
 {
-    float *ain;
+    // float *ain;
     int NB = Ii, loc;
     int N = fsig->N;
     float *data = input;
@@ -78,7 +78,7 @@ void SpectralAnalyzer::Analyze(size_t size)
     //                            Str("pvsanal: Not Initialised.\n"));
     // }
 
-    ain = ain;               /* The input samples */
+    // ain = ain;               /* The input samples */
     loc = inptr;             /* Circular buffer */
     nsmps -= early;
     for (i=offset; i < nsmps; i++) {
@@ -269,8 +269,11 @@ void SpectralAnalyzer::Analyze(size_t size)
         angleDif =  mod2Pi(angleDif);
         angleDif =  angleDif * N /TWOPI_F;
         ff[j].a = thismag;
+        
         // TODO -- not sure what this esr property represents
-        ff[j].b = csound->esr * (j + angleDif)/N;
+        // I'll just assume it's sample rate for now
+        // ff[j].b = csound->esr * (j + angleDif)/N;
+        ff[j].b = sr_ * (j + angleDif)/N;
       }
 /*       if (i==9) { */
 /*         printf("Frame as Amp/Freq %d\n", i); */
@@ -285,19 +288,13 @@ void SpectralAnalyzer::Analyze(size_t size)
 
 void SpectralAnalyzer::Tick(float sample) 
 {
-    // TODO -- convert overlapbuf to regular float buffer
-    float *inbuf = overlapbuf;
-
-    // This is an implicit test to see if inbuf is full.
-    // This is probably not good practice.
     if (inptr == fsig->overlap) {
       UpdateFrame();
       fsig->framecount++;
       inptr = 0;
     }
-
     //printf("inptr = %d fsig->overlap=%d\n", inptr, fsig->overlap);
-    inbuf[inptr++] = sample;
+    overlapbuf[inptr++] = sample;
 }
 
 void SpectralAnalyzer::UpdateFrame()

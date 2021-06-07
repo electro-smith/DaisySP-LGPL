@@ -49,6 +49,7 @@ class SpectralAnalyzer
     private:
         // TODO -- convert these to proper types
         // OPDS    h; csound specific property that we don't need
+        
         // This may change -- not necessary to be a member of this class
         SpectralBuffer  *fsig;          /* output signal is an analysis frame */
         float   *ain;                   /* input sig is audio */
