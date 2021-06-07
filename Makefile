@@ -2,7 +2,7 @@ TARGET = libdaicsp
 
 MODULE_DIR = Source
 
-# Each Module Directory is listed below with it's modules.
+# Each Module Directory is listed below with its modules.
 # Header only modules are listed commented out 
 # below the others.
 
@@ -35,6 +35,12 @@ PHYSICAL_MODELING_MOD_DIR = PhysicalModeling
 PHYSICAL_MODELING_MODULES = \
 pluck \
 
+SPECTRAL_MOD_DIR = Spectral
+SPECTRAL_MODULES = \
+spectral \
+phasevocoder \
+spectralanalyzer
+
 UTILITY_MOD_DIR = Utility
 UTILITY_MODULES = \
 jitter \
@@ -49,6 +55,7 @@ CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(DYNAMICS_MOD_DIR)/$(DYNAMICS_MO
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(EFFECTS_MOD_DIR)/$(EFFECTS_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(FILTER_MOD_DIR)/$(FILTER_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(PHYSICAL_MODELING_MOD_DIR)/$(PHYSICAL_MODELING_MODULES))
+CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(SPECTRAL_MOD_DIR)/$(SPECTRAL_MODULES))
 CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(UTILITY_MOD_DIR)/$(UTILITY_MODULES))
 
 ######################################
@@ -128,6 +135,7 @@ C_INCLUDES = \
 -I$(MODULE_DIR)/$(EFFECTS_MOD_DIR) \
 -I$(MODULE_DIR)/$(FILTER_MOD_DIR) \
 -I$(MODULE_DIR)/$(PHYSICAL_MODELING_MOD_DIR) \
+-I$(MODULE_DIR)/$(SPECTRAL_MOD_DIR) \
 -I$(MODULE_DIR)/$(UTILITY_MOD_DIR) 
 
 # compile gcc flags

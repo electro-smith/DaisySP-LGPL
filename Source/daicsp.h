@@ -13,8 +13,8 @@
 //
 
 #pragma once
-#ifndef DSYSP_H
-#define DSYSP_H
+#ifndef DCSP_H
+#define DCSP_H
 
 /** Control Modules */
 #include "Control/line.h"
@@ -37,9 +37,13 @@
 #include "Filters/nlfilt.h"
 #include "Filters/tone.h"
 
-
 /** Physical Modeling Modules */
 #include "PhysicalModeling/pluck.h"
+
+/** Spectral Modules */
+#include "Spectral/spectral.h"
+#include "Spectral/spectralanalyzer.h"
+#include "Spectral/phasevocoder.h"
 
 /** Utility Modules */
 #include "Utility/dsp.h"

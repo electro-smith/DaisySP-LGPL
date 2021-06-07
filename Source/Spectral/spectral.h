@@ -5,6 +5,10 @@
 namespace daicsp
 {
 
+enum WINDOW_SIZE {
+    MAX = 4096,
+};
+
 enum SPECTRAL_WINDOW {
     HAMMING = 0,
     HANN,
@@ -34,7 +38,10 @@ typedef struct {
     int wintype;
     int format;
     unsigned int framecount;
-    float* frame;
+    float frame[WINDOW_SIZE::MAX];
+
+    void Init(SPECTRAL_WINDOW window, int windowSize);
+
 } SpectralBuffer;
 
 

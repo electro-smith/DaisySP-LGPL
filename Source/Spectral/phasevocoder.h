@@ -25,13 +25,13 @@ class PhaseVocoder
         /** Processes a single sample and returns it.
          *  \param in - input sample
          */
-        void Process(const float &in); // pvsynth
+        void Process(const float* in, size_t size, SpectralBuffer &fsig); // pvsynth
 
         void Analyze(float sample); // pvssynth
 
-        void Tick(float sample); // analyze_tick
+        void Tick(float sample, SpectralBuffer &fsig); // analyze_tick
 
-        void UpdateFrame(); // process_frame
+        void UpdateFrame(SpectralBuffer &fsig); // process_frame
 
 
     private:
