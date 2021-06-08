@@ -3,6 +3,7 @@
 #define DSY_PHASEVOCODER_H
 
 #include "spectral.h"
+#include "shy_fft.h"
 
 namespace daicsp
 {
@@ -20,49 +21,51 @@ class PhaseVocoder
         /** Initializes the PhaseVocoder module.
          *  \param p - description
          */
-        void Init(float sampleRate);
+        // TODO -- this might be useful as an overload?
+        // void Init(int fftsize, int overlap, int windowSize, SPECTRAL_WINDOW windowType, size_t sampleRate, size_t block);
+
+        void Init(SpectralBuffer fsig, size_t sampleRate, size_t block);
 
         /** Processes a single sample and returns it.
          *  \param in - input sample
          */
-        void Process(const float* in, size_t size, SpectralBuffer &fsig); // pvsynth
+        // TODO -- probably best to not pass a raw pointer
+        float* Process(SpectralBuffer &fsig, size_t size); // pvsynth
 
         void Analyze(float sample); // pvssynth
 
-        void Tick(float sample, SpectralBuffer &fsig); // analyze_tick
+        float Tick(SpectralBuffer &fsig); // analyze_tick
 
         void UpdateFrame(SpectralBuffer &fsig); // process_frame
 
+        void Deinterlace(float* interlaced, float* targetBuffer, const int length);
 
     private:
-        // OPDS    h;
-        float   *aout;                  /* audio output signal */
-        SpectralBuffer  *fsig;                  /* input signal is an analysis frame */
-        float   *init;                  /* not yet implemented */
-        /* internal */
-        /* check these against fsig vals */
-        int    overlap,winsize,fftsize,wintype,format;
-        /* can we allow variant window tpes?  */
-        int    buflen;
-        float   fund,arate;
+
+        int     buflen;
+        // float   fund,arate;
         float   RoverTwoPi,TwoPioverR,Fexact;
         float   *nextOut;
-        int    nO,Ii,IOi;      /* need all these ?*/
-        int    outptr;
-        int    bin_index;      /* for phase normalization across frames */
-        /* renderer gets all format info from fsig */
+        int     nO,Ii,IOi;              /* need all these ?; double as N and NB */
+        int     outptr;
 
-        float*   output;
-        float*   overlapbuf;
-        float*   synbuf;
-        float*   analwinbuf;     /* may get away with a local alloc and free */
-        float*   synwinbuf;
-        float*   oldOutPhase;
+        // TODO -- adjust these according to the MAX window size
+        float output[WINDOW_SIZE::MAX];
+        float overlapbuf[WINDOW_SIZE::MAX];
+        float synbuf[WINDOW_SIZE::MAX];
+        float synbufOut[WINDOW_SIZE::MAX];
+        float analwinbuf[WINDOW_SIZE::MAX];     /* prewin in SDFT case */
+        float synwinbuf[WINDOW_SIZE::MAX];
+        float oldOutPhase[WINDOW_SIZE::MAX];
 
-        void    *setup; // FFT setup pointer
-
-        // TODO -- private properties need trailing underscores
+        ShyFFT<float, WINDOW_SIZE::MAX> fft_;
         float sr_;
+
+        // TODO -- ensure this is always greater than the block size!
+        float outputBuffer[64];
+        /* check these against fsig vals */
+        // int overlap,winsize,fftsize,wintype,format;
+        int bin_index;      /* for phase normalization across frames */
 };
 
 } // namespace daicsp

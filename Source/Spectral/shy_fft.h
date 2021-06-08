@@ -38,6 +38,9 @@
 #ifndef STMLIB_FFT_SHY_FFT_H_
 #define STMLIB_FFT_SHY_FFT_H_
 
+// TODO -- ensure this works as expected
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) TypeName(const TypeName&); void operator=(const TypeName&);
+
 // #include "stmlib/stmlib.h"
 
 #include <algorithm>
@@ -137,8 +140,7 @@ class LutPhasor {
   T* cos_ptr_;
   T* sin_ptr_;
   
-  // TODO -- how to handle this?
-  // DISALLOW_COPY_AND_ASSIGN(LutPhasor);
+  DISALLOW_COPY_AND_ASSIGN(LutPhasor);
 };
 
 template<typename T> struct LutPhasor<T, 0> { void Init() { }; };
@@ -194,7 +196,7 @@ class RotationPhasor {
   T real_;
   T imag_;
   
-  // DISALLOW_COPY_AND_ASSIGN(RotationPhasor);
+  DISALLOW_COPY_AND_ASSIGN(RotationPhasor);
 };
 
 template<typename T> struct RotationPhasor<T, 0> { void Init() { }; };
@@ -760,7 +762,7 @@ class ShyFFT {
   uint8_t bit_rev_[BitReversalLut<num_passes>::size];
   static const uint8_t bit_rev_256_lut_[256];
 
-  // DISALLOW_COPY_AND_ASSIGN(ShyFFT);
+  DISALLOW_COPY_AND_ASSIGN(ShyFFT);
 };
 
 template<typename T, size_t size, template <typename, size_t> class Phasor>

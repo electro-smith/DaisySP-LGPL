@@ -6,7 +6,7 @@ namespace daicsp
 {
 
 enum WINDOW_SIZE {
-    MAX = 4096,
+    MAX = 2048,
 };
 
 enum SPECTRAL_WINDOW {
@@ -47,6 +47,7 @@ typedef struct {
     float b;
 } Complex;
 
+int GetPasses(int fft_size);
 
 float mod2Pi(float value);
 

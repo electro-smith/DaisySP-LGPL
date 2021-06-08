@@ -11,7 +11,7 @@ void SpectralAnalyzer::Init(
   int fftsize, 
   int overlap, 
   int windowSize, 
-  SPECTRAL_WINDOW windowType, 
+  SPECTRAL_WINDOW windowType,
   size_t sampleRate,
   size_t blockSize
 )
@@ -170,14 +170,12 @@ SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
     // }
     // overlap is a pointer to a buffer, so no need to cast?
     // int over = (int)*overlap;
-    // This seems backwards -- shouldn't it tick when it's still collecting samples?
     if (fsig_.overlap<(int)nsmps || fsig_.overlap<10) {
       Analyze(in, size);
     } else {
       nsmps -= early;
 
       for (i=offset; i < nsmps; i++)
-        // Tick(ain[i]);
         Tick(in[i]);
     }
 
@@ -502,9 +500,16 @@ void SpectralAnalyzer::UpdateFrame()
     // }
     // else
     //   csound->RealFFTnp2(csound, anal, N);
-    
-    fft_.Direct(anal, analOut, N);
-    Interlace(analOut, N);
+    if (N != WINDOW_SIZE::MAX)
+    {
+      int num_passes = GetPasses(N);
+      fft_.Direct(anal, analOut, num_passes);
+    }
+    else
+    {
+      fft_.Direct(anal, analOut);
+    }
+    Interlace(analOut, anal, N);
 
     /* conversion: The real and imaginary values in anal are converted to
        magnitude and angle-difference-per-second (assuming an
@@ -515,12 +520,12 @@ void SpectralAnalyzer::UpdateFrame()
     for (i=ii=0    /*,i0=anal,i1=anal+1,oi=tempOldInPhase*/;
          i <= N2;
          i++,ii+=2 /*i0+=2,i1+=2, oi++*/) {
-      real = analOut[ii] /* *i0 */;
-      imag = analOut[ii+1] /* *i1 */;
-      /**i0*/ analOut[ii] = hypotf(real, imag);
+      real = anal[ii] /* *i0 */;
+      imag = anal[ii+1] /* *i1 */;
+      /**i0*/ anal[ii] = hypotf(real, imag);
       /* phase unwrapping */
       /*if (*i0 == 0.)*/
-      if (/* *i0 */ analOut[ii] < 1.0E-10f)
+      if (/* *i0 */ anal[ii] < 1.0E-10f)
         angleDif = 0.0f;
       else {
         rratio =  atan2((float)imag,(float)real);
@@ -534,12 +539,12 @@ void SpectralAnalyzer::UpdateFrame()
         angleDif = angleDif + TWOPI_F;
 
       /* add in filter center freq.*/
-      /* *i1 */ analOut[ii+1]  = angleDif * RoverTwoPi + ((float) i * Fexact);
+      /* *i1 */ anal[ii+1]  = angleDif * RoverTwoPi + ((float) i * Fexact);
 
     }
     /* } */
     /* else must be PVOC_COMPLEX */
-    fp = analOut;
+    fp = anal;
     ofp = fsig_.frame;      /* RWD MUST be 32bit */
     for (i=0;i < N+2;i++)
       /* *ofp++ = (float)(*fp++); */
@@ -563,16 +568,11 @@ void SpectralAnalyzer::UpdateFrame()
     IOi = Ii;
 }
 
-void SpectralAnalyzer::Interlace(float* fftSeparated, const int length) {
+void SpectralAnalyzer::Interlace(float* fftSeparated, float* targetBuffer, const int length) {
   // unfortunately, interleaving in place is not trivial, so another buffer will have to do
   int halflen = length / 2;
   for (int i = 0; i < halflen; i++) {
-    swapBuffer_[i*2] = fftSeparated[i];
-    swapBuffer_[i*2 + 1] = fftSeparated[i + halflen];
+    targetBuffer[i*2] = fftSeparated[i];
+    targetBuffer[i*2 + 1] = fftSeparated[i + halflen];
   }
-
-  for (int i = 0; i < length; i++) {
-    fftSeparated[i] = swapBuffer_[i];
-  }
-
 }

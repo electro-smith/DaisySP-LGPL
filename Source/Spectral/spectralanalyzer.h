@@ -15,6 +15,7 @@ namespace daicsp
  *  Ported from Csound pvs opcodes.
  */
 
+
 class SpectralAnalyzer
 {
     public:
@@ -30,6 +31,8 @@ class SpectralAnalyzer
          *  \param in - input sample
          */
         SpectralBuffer& Process(const float* in, size_t size); // pvsanal
+
+        SpectralBuffer& GetFsig() { return fsig_; }
         
     private:
 
@@ -43,7 +46,7 @@ class SpectralAnalyzer
 
         void UpdateFrame(); // generate_frame
 
-        void Interlace(float* fftSeparated, int length);
+        void Interlace(float* fftSeparated, float* targetBuffer, const int length);
 
 
     private:
@@ -67,25 +70,24 @@ class SpectralAnalyzer
         int     nI,Ii,IOi;              /* need all these ?; double as N and NB */
         int     inptr;
 
-        // TODO -- adjust these according to the MAX window size
         float input[WINDOW_SIZE::MAX];
         float overlapbuf[WINDOW_SIZE::MAX];
         float analbuf[WINDOW_SIZE::MAX];
         float analbufOut[WINDOW_SIZE::MAX];
         float analwinbuf[WINDOW_SIZE::MAX];     /* prewin in SDFT case */
         float oldInPhase[WINDOW_SIZE::MAX];
+
+        // TODO -- adjust these according to their appropriate sizes
         float trig[WINDOW_SIZE::MAX];
         float cosine[WINDOW_SIZE::MAX];
         float sine[WINDOW_SIZE::MAX]; // If floats aren't enough quality, return to doubles
-        // void    *setup; // this is a struct for Csound's FFT implementation
+
         ShyFFT<float, WINDOW_SIZE::MAX> fft_;
-
         SpectralBuffer fsig_;
-
         float sr_;
 
-        // TODO -- ideally, no swapping would be necessary
-        float* swapBuffer_;
+        // // TODO -- ideally, no swapping would be necessary
+        // float* swapBuffer_;
         
 };
 
