@@ -24,20 +24,24 @@ class SpectralAnalyzer
         /** Initializes the SpectralAnalyzer module.
          *  \param p - description
          */
-        void Init(float sampleRate);
+        void Init(int fftsize, int overlap, int windowSize, SPECTRAL_WINDOW windowType, size_t sampleRate, size_t block); //pvsanalset
 
         /** Processes a single sample and returns it.
          *  \param in - input sample
          */
-        void Process(const float* in, size_t size, SpectralBuffer &fsig); // pvsanal (?)
+        SpectralBuffer& Process(const float* in, size_t size); // pvsanal
+        
+    private:
+
+        void InitSmall(); // pvssanalset
 
         // TODO -- documentation and proper return types
         // NOTE -- these can be a private methods, right?
-        void Analyze(const float* in, size_t size, SpectralBuffer &fsig); // pvssanal
+        void Analyze(const float* in, size_t size); // pvssanal
 
-        void Tick(float sample, SpectralBuffer &fsig); // anal_tick
+        void Tick(float sample); // anal_tick
 
-        void UpdateFrame(SpectralBuffer &fsig); // generate_frame
+        void UpdateFrame(); // generate_frame
 
         void Interlace(float* fftSeparated, int length);
 
@@ -50,7 +54,7 @@ class SpectralAnalyzer
         // SpectralBuffer  *fsig;          /* output signal is an analysis frame */
         // float   *ain;                   /* input sig is audio */
         // float   *fftsize;               /* params */
-        float   *overlap;
+        // float   *overlap;
         // float   *winsize;
         // float   *wintype;
         // float   *format;                /* always PVS_AMP_FREQ at present */
@@ -63,8 +67,7 @@ class SpectralAnalyzer
         int     nI,Ii,IOi;              /* need all these ?; double as N and NB */
         int     inptr;
 
-        // TODO -- these can probably just be float arrays
-        // TODO -- how big should they be, though??
+        // TODO -- adjust these according to the MAX window size
         float input[WINDOW_SIZE::MAX];
         float overlapbuf[WINDOW_SIZE::MAX];
         float analbuf[WINDOW_SIZE::MAX];
@@ -77,13 +80,12 @@ class SpectralAnalyzer
         // void    *setup; // this is a struct for Csound's FFT implementation
         ShyFFT<float, WINDOW_SIZE::MAX> fft_;
 
+        SpectralBuffer fsig_;
+
         float sr_;
 
         // TODO -- ideally, no swapping would be necessary
         float* swapBuffer_;
-
-        // property to keep track of running input length
-        int runningLength_;
         
 };
 

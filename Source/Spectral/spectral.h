@@ -39,9 +39,6 @@ typedef struct {
     int format;
     unsigned int framecount;
     float frame[WINDOW_SIZE::MAX];
-
-    void Init(SPECTRAL_WINDOW window, int windowSize);
-
 } SpectralBuffer;
 
 
@@ -52,6 +49,14 @@ typedef struct {
 
 
 float mod2Pi(float value);
+
+void SpectralWindow(float* windowBuffer, int windowType, int windowLength);
+
+void Hamming(float* windowBuffer, int windowLength, int even);
+
+void Vonhann(float* windowBuffer, int windowLength, int even);
+
+double Besseli(double x);
 
 
 } // namespace daicsp

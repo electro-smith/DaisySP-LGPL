@@ -7,25 +7,151 @@
 
 using namespace daicsp;
 
-void SpectralAnalyzer::Init(float sampleRate)
+void SpectralAnalyzer::Init(
+  int fftsize, 
+  int overlap, 
+  int windowSize, 
+  SPECTRAL_WINDOW windowType, 
+  size_t sampleRate,
+  size_t blockSize
+)
 {
-    // Set private members to defaults
+
+    float *analwinhalf,*analwinbase;
+    float sum;
+    int halfwinsize;
+    int i,Mf/*,Lf*/;
+
+    unsigned int N = fftsize;
+    unsigned int M = windowSize;
+
+    if (overlap < (int) blockSize || overlap <= 10) /* 10 is a guess.... */
+    {
+      // return pvssanalset(csound, p);
+      // TODO -- put in extra special init here
+      InitSmall();
+      return;
+    } 
+
+    // TODO -- error handling
+    if (N <= 32)
+    {
+      // return csound->InitError(csound,
+      //                          Str("pvsanal: fftsize of 32 is too small!\n"));
+    }
+      
+
+    /* check N for powof2? CARL fft routines and FFTW are not limited to that */
+    N = N  + N%2;       /* Make N even */
+    // TODO -- error handling
+    if (M < N) 
+    {
+      //  csound->Warning(csound,
+      //                          Str("pvsanal: window size too small for fftsize"));
+       M = N;
+    }
+
+    // TODO -- error handling
+    if (overlap > (int) N / 2)
+    {
+      // return csound->InitError(csound,
+      //                          Str("pvsanal: overlap too big for fft size\n"));
+    }
+
+    halfwinsize = M/2;
+    buflen = M*4;
+    // arate = (float)(csound->esr / (float) overlap);
+    // fund = (float)(csound->esr / (float) N);
+    float arate = (float)(sampleRate / (float) overlap);
+    // float fund = (float)(sampleRate / (float) N);
+
+    // int nBins = N/2 + 1;
+
+    /* we can exclude/simplify all sorts of stuff in CARL
+     * as we will never do time-scaling with this opcode
+     */
+    /*Lf =*/ 
+    Mf = 1 - M%2;
+
+    // // NOTE -- take note of these and how they reflect on static allocation
+    // csound->AuxAlloc(csound, overlap * sizeof(float), &overlapbuf);
+    // csound->AuxAlloc(csound, (N+2) * sizeof(float), &analbuf);
+    // csound->AuxAlloc(csound, (M+Mf) * sizeof(float), &analwinbuf);
+    // csound->AuxAlloc(csound, nBins * sizeof(float), &oldInPhase);
+    // csound->AuxAlloc(csound, buflen * sizeof(float), &input);
+    // /* the signal itself */
+    // csound->AuxAlloc(csound, (N+2) * sizeof(float), &fsig_.frame);
+
+    /* make the analysis window*/
+    analwinbase = analwinbuf;
+    analwinhalf = analwinbase + halfwinsize;
+
+    // TODO -- error handling
+    // if (PVS_CreateWindow(csound, analwinhalf, windowType, M) != OK)
+    //   return NOTOK;
+
+    // TODO -- manage the window creation
+    SpectralWindow(analwinhalf, windowType, M);
+
+    for (i = 1; i <= halfwinsize; i++)
+      *(analwinhalf - i) = *(analwinhalf + i - Mf);
+    if (M > N) {
+      double dN = (double)N;
+      /*  sinc function */
+      if (Mf)
+        *analwinhalf *= (float)(dN * sin(HALFPI_F/dN) / (HALFPI_F));
+      for (i = 1; i <= halfwinsize; i++)
+        *(analwinhalf + i) *= (float)
+          (dN * sin((double)(PI_F*(i+0.5*Mf)/dN)) / (PI_F*(i+0.5*Mf)));
+      for (i = 1; i <= halfwinsize; i++)
+        *(analwinhalf - i) = *(analwinhalf + i - Mf);
+    }
+    /* get net amp */
+    sum = 0.0f;
+
+    for (i = -halfwinsize; i <= halfwinsize; i++)
+      sum += *(analwinhalf + i);
+    sum = 2.0f / sum;  /* factor of 2 comes in later in trig identity */
+    for (i = -halfwinsize; i <= halfwinsize; i++)
+      *(analwinhalf + i) *= sum;
+
+
+  /*    invR = (float)(FL(1.0) / csound->esr); */
+    RoverTwoPi = (float)(arate / TWOPI_F);
+    TwoPioverR = (float)(TWOPI_F / arate);
+    Fexact =  (float)(sampleRate / (float)N);
+    nI = -((int64_t)(halfwinsize/overlap))*overlap; /* input time (in samples) */
+    /*Dd = halfwinsize + nI + 1;                     */
+    /* in streaming mode, Dd = ovelap all the time */
+    Ii = 0;
+    IOi = 0;
+    nextIn = input;
+    inptr = 0;
+    /* and finally, set up the output signal */
+    fsig_.N = N;
+    fsig_.overlap = overlap;
+    fsig_.winsize = M;
+    fsig_.wintype = windowType;
+    fsig_.framecount = 1;
+    fsig_.format = SPECTRAL_FORMAT::AMP_FREQ;      /* only this, for now */
+    fsig_.sliding = 0;
+
+    // if (!(N & (N - 1))) /* if pow of two use this */
+    //  setup = csound->RealFFT2Setup(csound,N,FFT_FWD);
+    // return OK;
+
     sr_ = sampleRate;
-    // Do stuff
+
     fft_.Init();
 }
 
-void SpectralAnalyzer::Process(const float* in, size_t size, SpectralBuffer &fsig)
+void SpectralAnalyzer::InitSmall() 
 {
+  
+}
 
-    // NOTE -- this could be avoided if window size is
-    // locked down
-    if (fsig.winsize > WINDOW_SIZE::MAX)
-    {
-      // TODO -- call error here
-    }
-
-    buflen = fsig.winsize;
+SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
+{
 
     // float *ain;
     // unsigned int offset = h.insdshead->ksmps_offset;
@@ -43,24 +169,26 @@ void SpectralAnalyzer::Process(const float* in, size_t size, SpectralBuffer &fsi
     //                            Str("pvsanal: Not Initialised.\n"));
     // }
     // overlap is a pointer to a buffer, so no need to cast?
-    int over = (int)*overlap;
+    // int over = (int)*overlap;
     // This seems backwards -- shouldn't it tick when it's still collecting samples?
-    if (over<(int)nsmps || over<10) {
-      Analyze(in, size, fsig);
+    if (fsig_.overlap<(int)nsmps || fsig_.overlap<10) {
+      Analyze(in, size);
     } else {
       nsmps -= early;
 
       for (i=offset; i < nsmps; i++)
         // Tick(ain[i]);
-        Tick(in[i], fsig);
+        Tick(in[i]);
     }
+
+    return fsig_;
 }
 
-void SpectralAnalyzer::Analyze(const float* in, size_t size, SpectralBuffer &fsig)
+void SpectralAnalyzer::Analyze(const float* in, size_t size)
 {
     // float *ain;
     int NB = Ii, loc;
-    int N = fsig.N;
+    int N = fsig_.N;
     float *data = input;
     Complex *fw = (Complex*) analwinbuf; // casting this regular float buffer to complex values is annoying
     float *c = cosine;
@@ -98,7 +226,7 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size, SpectralBuffer &fsi
       /* get the frame for this sample */
 
       // TODO -- is this always a set of complex numbers? if so, just declare it as complex, no?
-      ff = (Complex*)(fsig.frame) + i*NB;
+      ff = (Complex*)(fsig_.frame) + i*NB;
       /* fw is the current frame at this sample */
       for (j = 0; j < NB; j++) {
         float ci = c[j], si = s[j];
@@ -122,7 +250,7 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size, SpectralBuffer &fsi
                                       0.02838 [F_{t-2}+F_{t+2}] */
       /* BHarris_min:Fw_t = 0.42323 F_t - 0.2486703 [ F_{t-1}+F_{t+1}] +
                                       0.0391396 [F_{t-2}+F_{t+2}] */
-      switch (fsig.wintype) {
+      switch (fsig_.wintype) {
       case SPECTRAL_WINDOW::HAMMING:
         for (j=0; j<NB; j++) {
           ff[j].a = 0.54f*fw[j].a;
@@ -292,24 +420,24 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size, SpectralBuffer &fsi
     // return OK;
 }
 
-void SpectralAnalyzer::Tick(float sample, SpectralBuffer &fsig) 
+void SpectralAnalyzer::Tick(float sample) 
 {
-    if (inptr == fsig.overlap) {
-      UpdateFrame(fsig);
-      fsig.framecount++;
+    if (inptr == fsig_.overlap) {
+      UpdateFrame();
+      fsig_.framecount++;
       inptr = 0;
     }
-    //printf("inptr = %d fsig->overlap=%d\n", inptr, fsig->overlap);
+    //printf("inptr = %d fsig_.overlap=%d\n", inptr, fsig_.overlap);
     overlapbuf[inptr++] = sample;
 }
 
-void SpectralAnalyzer::UpdateFrame(SpectralBuffer &fsig)
+void SpectralAnalyzer::UpdateFrame()
 {
     int got, tocp,i,j,k,ii;
-    int N = fsig.N;
+    int N = fsig_.N;
     int N2 = N/2;
     // int buflen = buflen;
-    int analWinLen = fsig.winsize/2;
+    int analWinLen = fsig_.winsize/2;
     int synWinLen = analWinLen;
     float *ofp;                 /* RWD MUST be 32bit */
     float *fp;
@@ -321,7 +449,7 @@ void SpectralAnalyzer::UpdateFrame(SpectralBuffer &fsig)
     float angleDif,real,imag,phase;
     float rratio;
 
-    got = fsig.overlap;      /*always assume */
+    got = fsig_.overlap;      /*always assume */
     fp = overlapbuf;
     tocp = (got<= tempInput + buflen - nextIn ? got : tempInput + buflen - nextIn);
     got -= tocp;
@@ -412,14 +540,14 @@ void SpectralAnalyzer::UpdateFrame(SpectralBuffer &fsig)
     /* } */
     /* else must be PVOC_COMPLEX */
     fp = analOut;
-    ofp = (float *) (fsig.frame);      /* RWD MUST be 32bit */
+    ofp = fsig_.frame;      /* RWD MUST be 32bit */
     for (i=0;i < N+2;i++)
       /* *ofp++ = (float)(*fp++); */
       ofp[i] = (float) fp[i];
 
-    nI += fsig.overlap;                          /* increment time */
-    if (nI > (synWinLen + fsig.overlap))
-      Ii = /*I*/fsig.overlap;
+    nI += fsig_.overlap;                          /* increment time */
+    if (nI > (synWinLen + fsig_.overlap))
+      Ii = /*I*/fsig_.overlap;
     else
       if (nI > synWinLen)
         Ii = nI - synWinLen;
