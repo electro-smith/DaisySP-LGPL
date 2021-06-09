@@ -29,7 +29,7 @@ void SpectralAnalyzer::Init(
     {
       // return pvssanalset(csound, p);
       // TODO -- put in extra special init here
-      InitSmall();
+      InitSliding(fftsize, overlap, windowSize, windowType, sampleRate, blockSize);
       return;
     } 
 
@@ -96,13 +96,13 @@ void SpectralAnalyzer::Init(
     for (i = 1; i <= halfwinsize; i++)
       *(analwinhalf - i) = *(analwinhalf + i - Mf);
     if (M > N) {
-      double dN = (double)N;
+      float dN = (float)N;
       /*  sinc function */
       if (Mf)
         *analwinhalf *= (float)(dN * sin(HALFPI_F/dN) / (HALFPI_F));
       for (i = 1; i <= halfwinsize; i++)
         *(analwinhalf + i) *= (float)
-          (dN * sin((double)(PI_F*(i+0.5*Mf)/dN)) / (PI_F*(i+0.5*Mf)));
+          (dN * sin((float)(PI_F*(i+0.5*Mf)/dN)) / (PI_F*(i+0.5*Mf)));
       for (i = 1; i <= halfwinsize; i++)
         *(analwinhalf - i) = *(analwinhalf + i - Mf);
     }
@@ -134,20 +134,89 @@ void SpectralAnalyzer::Init(
     fsig_.wintype = windowType;
     fsig_.framecount = 1;
     fsig_.format = SPECTRAL_FORMAT::AMP_FREQ;      /* only this, for now */
-    fsig_.sliding = 0;
+    fsig_.sliding = false;
 
     // if (!(N & (N - 1))) /* if pow of two use this */
     //  setup = csound->RealFFT2Setup(csound,N,FFT_FWD);
     // return OK;
 
     sr_ = sampleRate;
-
     fft_.Init();
 }
 
-void SpectralAnalyzer::InitSmall() 
+void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPECTRAL_WINDOW windowType, size_t sampleRate, size_t block) 
 {
-  
+    /* opcode params */
+    int N = windowSize;
+    int NB;
+    int i;
+
+    // TODO -- error handling
+    // if (N<=0) return csound->InitError(csound, Str("Invalid window size"));
+    /* deal with iinit and iformat later on! */
+
+    N = N + N%2;               /* Make N even */
+    NB = N/2+1;                 /* Number of bins */
+
+    /* Need space for NB complex numbers for each of ksmps */
+
+    // TODO -- do we really need this allocation?
+    // if (fsig_.frame==NULL ||
+    //     block*(N+2)*sizeof(float) > (uint32_t)fsig_.frame.size)
+    //   csound->AuxAlloc(csound, block*(N+2)*sizeof(float),&fsig_.frame);
+    // else memset(fsig_.frame, 0, block*(N+2)*sizeof(float));
+
+    /* Space for remembering samples */
+  //   if (input.auxp==NULL ||
+  //       N*sizeof(float) > (uint32_t)input.size)
+  //     csound->AuxAlloc(csound, N*sizeof(float),&input);
+  //   else memset(input.auxp, 0, N*sizeof(float));
+  //   csound->AuxAlloc(csound, NB * sizeof(float), &oldInPhase);
+
+  //  if (analwinbuf.auxp==NULL ||
+  //       NB*sizeof(CMPLX) > (uint32_t)analwinbuf.size)
+  //     csound->AuxAlloc(csound, NB*sizeof(CMPLX),&analwinbuf);
+  //   else memset(analwinbuf.auxp, 0, NB*sizeof(CMPLX));
+
+    inptr = 0;                 /* Pointer in circular buffer */
+    fsig_.NB = Ii = NB;
+    fsig_.wintype = windowType;
+    fsig_.format = SPECTRAL_FORMAT::AMP_FREQ;      /* only this, for now */
+    fsig_.N = nI  = N;
+    fsig_.sliding = true;
+
+    // NOTE -- avoiding allocation but still filling trig buffers
+    /* Need space for NB sines, cosines and a scatch phase area */
+    // if (trig.auxp==NULL ||
+    //     (2*NB)*sizeof(float) > (uint32_t)trig.size)
+    //   csound->AuxAlloc(csound,(2*NB)*sizeof(float),&trig);
+    {
+      float dc = cos(TWOPI_F/(float)N);
+      float ds = sin(TWOPI_F/(float)N);
+      float *c = trig;
+      float *s = c+NB;
+      cosine = c;
+      sine = s;
+      c[0] = 1.0; s[0] = 0.0; // assignment to s unnecessary as auxalloc zeros
+        /*
+          direct computation of c and s may be better for large n
+          c[i] = cos(2*PI*i/n);
+          s[i] = sin(2*PI*i/n);
+          if (i % 16 == 15) {
+          c[i] = cos(2*PI*(i+1)/n);
+          s[i] = sin(2*PI*(i+1)/n);
+        */
+      for (i=1; i<NB; i++) {
+          c[i] = dc*c[i-1] - ds*s[i-1];
+          s[i] = ds*c[i-1] + dc*s[i-1];
+      }
+/*       for (i=0; i<NB; i++)  */
+/*         printf("c[%d] = %f   \ts[%d] = %f\n", i, c[i], i, s[i]); */
+    }
+    // return OK;
+
+    sr_ = sampleRate;
+    fft_.Init();
 }
 
 SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
@@ -156,7 +225,7 @@ SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
     // float *ain;
     // unsigned int offset = h.insdshead->ksmps_offset;
     // unsigned int early  = h.insdshead->ksmps_no_end;
-    // unsigned int i, nsmps = CS_KSMPS;
+    // unsigned int i, nsmps = block;
     unsigned int early = 0;
     unsigned int offset = 0;
     unsigned int i, nsmps = size;
@@ -199,7 +268,7 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
 
     unsigned int offset = 0;
     unsigned int early = 0;
-    // unsigned int i, nsmps = CS_KSMPS;
+    // unsigned int i, nsmps = block;
     unsigned int i, nsmps = size;
 
     // TODO -- shall we include error handling?

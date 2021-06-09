@@ -36,7 +36,7 @@ class SpectralAnalyzer
         
     private:
 
-        void InitSmall(); // pvssanalset
+        void InitSliding(int fftsize, int overlap, int windowSize, SPECTRAL_WINDOW windowType, size_t sampleRate, size_t block); // pvssanalset
 
         // TODO -- documentation and proper return types
         // NOTE -- these can be a private methods, right?
@@ -79,8 +79,8 @@ class SpectralAnalyzer
 
         // TODO -- adjust these according to their appropriate sizes
         float trig[WINDOW_SIZE::MAX];
-        float cosine[WINDOW_SIZE::MAX];
-        float sine[WINDOW_SIZE::MAX]; // If floats aren't enough quality, return to doubles
+        float* cosine;
+        float* sine; // If floats aren't enough quality, return to doubles
 
         ShyFFT<float, WINDOW_SIZE::MAX> fft_;
         SpectralBuffer fsig_;

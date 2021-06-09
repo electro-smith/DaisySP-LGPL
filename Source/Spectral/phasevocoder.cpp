@@ -32,18 +32,17 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
     // p->wintype = wintype;
     // p->format = fsig.format;
 
-    // NOTE -- Sliding is always set to false, so this will never happen
-    // if (fsig.sliding) {
-    //   /* get params from input fsig */
-    //   /* we TRUST they are legal */
+    if (fsig.sliding) {
+      /* get params from input fsig */
+      /* we TRUST they are legal */
     //   int wintype = fsig.wintype;
-    //   /* and put into locals */
-    //   p->wintype = wintype;
-    //   p->format = fsig.format;
-    //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->oldOutPhase);
-    //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->output);
-    //   return OK;
-    // }
+      /* and put into locals */
+    //   wintype = wintype;
+    //   format = fsig.format;
+        //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->oldOutPhase);
+        //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->output);
+      return;
+    }
 
     /* and put into locals */
     halfwinsize = M/2;
@@ -179,8 +178,11 @@ float* PhaseVocoder::Process(SpectralBuffer &fsig, size_t size)
     //                            Str("pvsynth: Not Initialised.\n"));
     // }
     
-    // // This will always be false
-    // if (fsig.sliding) return Analyze();
+    if (fsig.sliding)
+    {
+        Analyze(fsig, size);
+        return outputBuffer;
+    } 
 
     // TODO -- could these be useful for handling 
     // if (offset) memset(outputBuffer, '\0', offset*sizeof(float));
@@ -194,42 +196,39 @@ float* PhaseVocoder::Process(SpectralBuffer &fsig, size_t size)
     return outputBuffer;
 }
 
-void PhaseVocoder::Analyze(float sample) 
+void PhaseVocoder::Analyze(SpectralBuffer& fsig, size_t size) 
 {
-    // int i, k;
-    // int ksmps = CS_KSMPS;
-    // int N = fsig.N;
-    // int NB = fsig.NB;
-    // float *outputBuffer = outputBuffer;
-    // Complex *ff;
-    // float *h = (float*)oldOutPhase.auxp;
-    // float *output = (float*)output.auxp;
+    int i, k;
+    int ksmps = size;
+    int N = fsig.N;
+    int NB = fsig.NB;
+    Complex *ff;
+    float *h = oldOutPhase;
 
-    // /* Get real part from AMP/FREQ */
-    // for (i=0; i<ksmps; i++) {
-    //   float a;
-    //   ff = (Complex*)(fsig.frame.auxp) + i*NB;
-    //   for (k=0; k<NB; k++) {
-    //     float tmp, phase;
+    /* Get real part from AMP/FREQ */
+    for (i=0; i<ksmps; i++) {
+      float a;
+      ff = (Complex*)(fsig.frame) + i*NB;
+      for (k=0; k<NB; k++) {
+        float tmp, phase;
 
-    //     tmp = ff[k].b; /* Actually frequency */
-    //     /* subtract bin mid frequency */
-    //     tmp -= (float)k * csound->esr/N;
-    //     /* get bin deviation from freq deviation */
-    //     tmp *= TWOPI_F /csound->esr;
-    //     /* add the overlap phase advance back in */
-    //     tmp += (float)k*TWOPI_F/N;
-    //     h[k] = phase = mod2Pi(h[k] + tmp);
-    //     output[k] = ff[k].a*cos(phase);
-    //   }
-    //   a = 0.0f;
-    //   for (k=1; k<NB-1; k++) {
-    //     a -= output[k];
-    //     if (k+1<NB-1) a+=output[++k];
-    //   }
-    //   outputBuffer[i] = (a+a+output[0]-output[NB-1])/N;
-    // }
-    // // return OK;
+        tmp = ff[k].b; /* Actually frequency */
+        /* subtract bin mid frequency */
+        tmp -= (float)k * sr_/N;
+        /* get bin deviation from freq deviation */
+        tmp *= TWOPI_F / sr_;
+        /* add the overlap phase advance back in */
+        tmp += (float)k*TWOPI_F/N;
+        h[k] = phase = mod2Pi(h[k] + tmp);
+        output[k] = ff[k].a*cos(phase);
+      }
+      a = 0.0f;
+      for (k=1; k<NB-1; k++) {
+        a -= output[k];
+        if (k+1<NB-1) a+=output[++k];
+      }
+      outputBuffer[i] = (a+a+output[0]-output[NB-1])/N;
+    }
 }
 
 float PhaseVocoder::Tick(SpectralBuffer& fsig) 

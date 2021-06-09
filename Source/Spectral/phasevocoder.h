@@ -32,7 +32,7 @@ class PhaseVocoder
         // TODO -- probably best to not pass a raw pointer
         float* Process(SpectralBuffer &fsig, size_t size); // pvsynth
 
-        void Analyze(float sample); // pvssynth
+        void Analyze(SpectralBuffer& fsig, size_t size); // pvssynth
 
         float Tick(SpectralBuffer &fsig); // analyze_tick
 
@@ -60,6 +60,7 @@ class PhaseVocoder
 
         ShyFFT<float, WINDOW_SIZE::MAX> fft_;
         float sr_;
+        int blockSize_;
 
         // TODO -- ensure this is always greater than the block size!
         float outputBuffer[64];
