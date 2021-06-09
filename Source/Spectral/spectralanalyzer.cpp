@@ -17,6 +17,8 @@ void SpectralAnalyzer::Init(
 )
 {
 
+    status_ = STATUS::OK;
+
     float *analwinhalf,*analwinbase;
     float sum;
     int halfwinsize;
@@ -28,38 +30,67 @@ void SpectralAnalyzer::Init(
     if (overlap < (int) blockSize || overlap <= 10) /* 10 is a guess.... */
     {
       // return pvssanalset(csound, p);
-      // TODO -- put in extra special init here
+
+      // TODO -- fully implement sliding
+      status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
+      return;
+
       InitSliding(fftsize, overlap, windowSize, windowType, sampleRate, blockSize);
       return;
     } 
 
-    // TODO -- error handling
+    if (N & (N - 1))
+    {
+      status_ = STATUS::E_FFT_NOT_POWER;
+      return;
+    }
+
     if (N <= 32)
     {
+      status_ = STATUS::W_FFT_TOO_SMALL;
+      N = 64;
       // return csound->InitError(csound,
       //                          Str("pvsanal: fftsize of 32 is too small!\n"));
     }
+    else if (N > FFT::MAX_SIZE)
+    {
+      status_ = STATUS::W_FFT_TOO_BIG;
+      N = FFT::MAX_SIZE;
+    }
       
-
     /* check N for powof2? CARL fft routines and FFTW are not limited to that */
     N = N  + N%2;       /* Make N even */
-    // TODO -- error handling
+
     if (M < N) 
     {
       //  csound->Warning(csound,
       //                          Str("pvsanal: window size too small for fftsize"));
-       M = N;
+      status_ = STATUS::W_WINDOW_TOO_SMALL;
+      M = N;
+    }
+    else if (M > FFT::MAX_SIZE)
+    {
+      status_ = STATUS::W_WINDOW_TOO_BIG;
+      M = FFT::MAX_SIZE;
     }
 
-    // TODO -- error handling
     if (overlap > (int) N / 2)
     {
+      status_ = STATUS::W_OVERLAP_TOO_BIG;
+      overlap = (int) N / 2;
       // return csound->InitError(csound,
       //                          Str("pvsanal: overlap too big for fft size\n"));
     }
 
+    // NOTE -- only Hamming and Hann are supported
+    if (windowType != SPECTRAL_WINDOW::HAMMING && windowType != SPECTRAL_WINDOW::HANN)
+    {
+      status_ = STATUS::W_INVALID_WINDOW;
+      windowType = SPECTRAL_WINDOW::HAMMING;
+    }
+
     halfwinsize = M/2;
-    buflen = M*4;
+    buflen_ = M*4;
     // arate = (float)(csound->esr / (float) overlap);
     // fund = (float)(csound->esr / (float) N);
     float arate = (float)(sampleRate / (float) overlap);
@@ -78,19 +109,17 @@ void SpectralAnalyzer::Init(
     // csound->AuxAlloc(csound, (N+2) * sizeof(float), &analbuf);
     // csound->AuxAlloc(csound, (M+Mf) * sizeof(float), &analwinbuf);
     // csound->AuxAlloc(csound, nBins * sizeof(float), &oldInPhase);
-    // csound->AuxAlloc(csound, buflen * sizeof(float), &input);
+    // csound->AuxAlloc(csound, buflen_ * sizeof(float), &input);
     // /* the signal itself */
     // csound->AuxAlloc(csound, (N+2) * sizeof(float), &fsig_.frame);
 
     /* make the analysis window*/
-    analwinbase = analwinbuf;
+    analwinbase = analwinbuf_;
     analwinhalf = analwinbase + halfwinsize;
 
-    // TODO -- error handling
     // if (PVS_CreateWindow(csound, analwinhalf, windowType, M) != OK)
     //   return NOTOK;
 
-    // TODO -- manage the window creation
     SpectralWindow(analwinhalf, windowType, M);
 
     for (i = 1; i <= halfwinsize; i++)
@@ -117,16 +146,16 @@ void SpectralAnalyzer::Init(
 
 
   /*    invR = (float)(FL(1.0) / csound->esr); */
-    RoverTwoPi = (float)(arate / TWOPI_F);
-    TwoPioverR = (float)(TWOPI_F / arate);
-    Fexact =  (float)(sampleRate / (float)N);
-    nI = -((int64_t)(halfwinsize/overlap))*overlap; /* input time (in samples) */
-    /*Dd = halfwinsize + nI + 1;                     */
+    RoverTwoPi_ = (float)(arate / TWOPI_F);
+    TwoPioverR_ = (float)(TWOPI_F / arate);
+    Fexact_ =  (float)(sampleRate / (float)N);
+    nI_ = -((int64_t)(halfwinsize/overlap))*overlap; /* input time (in samples) */
+    /*Dd = halfwinsize + nI_ + 1;                     */
     /* in streaming mode, Dd = ovelap all the time */
-    Ii = 0;
-    IOi = 0;
-    nextIn = input;
-    inptr = 0;
+    Ii_ = 0;
+    IOi_ = 0;
+    nextIn_ = input_;
+    inptr_ = 0;
     /* and finally, set up the output signal */
     fsig_.N = N;
     fsig_.overlap = overlap;
@@ -151,7 +180,11 @@ void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPE
     int NB;
     int i;
 
-    // TODO -- error handling
+    if (N <= 0)
+    {
+      status_ = STATUS::W_WINDOW_TOO_SMALL;
+      return;
+    }
     // if (N<=0) return csound->InitError(csound, Str("Invalid window size"));
     /* deal with iinit and iformat later on! */
 
@@ -160,7 +193,7 @@ void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPE
 
     /* Need space for NB complex numbers for each of ksmps */
 
-    // TODO -- do we really need this allocation?
+    // NOTE -- static allocation makes sliding particularly difficult
     // if (fsig_.frame==NULL ||
     //     block*(N+2)*sizeof(float) > (uint32_t)fsig_.frame.size)
     //   csound->AuxAlloc(csound, block*(N+2)*sizeof(float),&fsig_.frame);
@@ -178,11 +211,11 @@ void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPE
   //     csound->AuxAlloc(csound, NB*sizeof(CMPLX),&analwinbuf);
   //   else memset(analwinbuf.auxp, 0, NB*sizeof(CMPLX));
 
-    inptr = 0;                 /* Pointer in circular buffer */
-    fsig_.NB = Ii = NB;
+    inptr_ = 0;                 /* Pointer in circular buffer */
+    fsig_.NB = Ii_ = NB;
     fsig_.wintype = windowType;
     fsig_.format = SPECTRAL_FORMAT::AMP_FREQ;      /* only this, for now */
-    fsig_.N = nI  = N;
+    fsig_.N = nI_  = N;
     fsig_.sliding = true;
 
     // NOTE -- avoiding allocation but still filling trig buffers
@@ -193,10 +226,10 @@ void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPE
     {
       float dc = cos(TWOPI_F/(float)N);
       float ds = sin(TWOPI_F/(float)N);
-      float *c = trig;
+      float *c = trig_;
       float *s = c+NB;
-      cosine = c;
-      sine = s;
+      cosine_ = c;
+      sine_ = s;
       c[0] = 1.0; s[0] = 0.0; // assignment to s unnecessary as auxalloc zeros
         /*
           direct computation of c and s may be better for large n
@@ -216,7 +249,8 @@ void SpectralAnalyzer::InitSliding(int fftsize, int overlap, int windowSize, SPE
     // return OK;
 
     sr_ = sampleRate;
-    fft_.Init();
+    // The fft isn't used in sliding mode
+    // fft_.Init();
 }
 
 SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
@@ -232,7 +266,7 @@ SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
 
     // ain = ain;
 
-    // TODO -- error reporting
+    // NOTE -- keep this in mind if we decide to dynamically allocate
     // if (input.auxp==NULL) {
     //   return csound->PerfError(csound,&(h),
     //                            Str("pvsanal: Not Initialised.\n"));
@@ -240,7 +274,7 @@ SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
     // overlap is a pointer to a buffer, so no need to cast?
     // int over = (int)*overlap;
     if (fsig_.overlap<(int)nsmps || fsig_.overlap<10) {
-      Analyze(in, size);
+      ProcessSliding(in, size);
     } else {
       nsmps -= early;
 
@@ -251,34 +285,29 @@ SpectralBuffer& SpectralAnalyzer::Process(const float* in, size_t size)
     return fsig_;
 }
 
-void SpectralAnalyzer::Analyze(const float* in, size_t size)
+void SpectralAnalyzer::ProcessSliding(const float* in, size_t size)
 {
     // float *ain;
-    int NB = Ii, loc;
+    int NB = Ii_, loc;
     int N = fsig_.N;
-    float *data = input;
-    Complex *fw = (Complex*) analwinbuf; // casting this regular float buffer to complex values is annoying
-    float *c = cosine;
-    float *s = sine;
-    float *h = oldInPhase;
-
-    // TODO -- make these csound values work with daisy syntax
-    // unsigned int offset = h.insdshead->ksmps_offset;
-    // unsigned int early  = h.insdshead->ksmps_no_end;
+    float *data = input_;
+    Complex *fw = (Complex*) analwinbuf_; // casting this regular float buffer to complex values is annoying
+    float *c = cosine_;
+    float *s = sine_;
+    float *h = oldInPhase_;
 
     unsigned int offset = 0;
     unsigned int early = 0;
-    // unsigned int i, nsmps = block;
     unsigned int i, nsmps = size;
 
-    // TODO -- shall we include error handling?
+    // NOTE -- keep this in mind if we decide to dynamically allocate
     // if (data==NULL) {
     //   return csound->PerfError(csound,&(h),
     //                            Str("pvsanal: Not Initialised.\n"));
     // }
 
     // ain = ain;               /* The input samples */
-    loc = inptr;             /* Circular buffer */
+    loc = inptr_;             /* Circular buffer */
     nsmps -= early;
     for (i=offset; i < nsmps; i++) {
       float re, im, dx;
@@ -292,7 +321,6 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
       data[loc] = *in++;
       /* get the frame for this sample */
 
-      // TODO -- is this always a set of complex numbers? if so, just declare it as complex, no?
       ff = (Complex*)(fsig_.frame) + i*NB;
       /* fw is the current frame at this sample */
       for (j = 0; j < NB; j++) {
@@ -302,7 +330,7 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
         fw[j].a = ci*re - si*im;
         fw[j].b = ci*im + si*re;
       }
-      loc++; if (loc==nI) loc = 0; /* Circular buffer */
+      loc++; if (loc==nI_) loc = 0; /* Circular buffer */
       /* apply window and transfer to ff buffer*/
       /* Rectang :Fw_t =     F_t                          */
       /* Hamming :Fw_t = 0.54F_t - 0.23[ F_{t-1}+F_{t+1}] */
@@ -343,7 +371,7 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
         ff[NB-1].a -= 0.5f*fw[NB-2].a;
         break;
       default:
-        // TODO -- error handling?
+        status_ = STATUS::W_INVALID_WINDOW;
         // csound->Warning(csound,
         //                 Str("Unknown window type; replaced by rectangular\n"));
         /* FALLTHRU */
@@ -471,8 +499,6 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
         angleDif =  angleDif * N /TWOPI_F;
         ff[j].a = thismag;
         
-        // TODO -- not sure what this esr property represents
-        // I'll just assume it's sample rate for now
         // ff[j].b = csound->esr * (j + angleDif)/N;
         ff[j].b = sr_ * (j + angleDif)/N;
       }
@@ -483,53 +509,52 @@ void SpectralAnalyzer::Analyze(const float* in, size_t size)
 /*       } */
     }
 
-    inptr = loc;
+    inptr_ = loc;
     // return OK;
 }
 
 void SpectralAnalyzer::Tick(float sample) 
 {
-    if (inptr == fsig_.overlap) {
-      UpdateFrame();
+    if (inptr_ == fsig_.overlap) {
+      GenerateFrame();
       fsig_.framecount++;
-      inptr = 0;
+      inptr_ = 0;
     }
-    //printf("inptr = %d fsig_.overlap=%d\n", inptr, fsig_.overlap);
-    overlapbuf[inptr++] = sample;
+    //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
+    overlapbuf_[inptr_++] = sample;
 }
 
-void SpectralAnalyzer::UpdateFrame()
+void SpectralAnalyzer::GenerateFrame()
 {
     int got, tocp,i,j,k,ii;
     int N = fsig_.N;
     int N2 = N/2;
-    // int buflen = buflen;
     int analWinLen = fsig_.winsize/2;
     int synWinLen = analWinLen;
     float *ofp;                 /* RWD MUST be 32bit */
     float *fp;
-    float *anal = analbuf;
-    float *analOut = analbufOut;
-    float *tempInput = input;
-    float *analWindow = analwinbuf + analWinLen;
-    float *tempOldInPhase = oldInPhase;
+    float *anal = analbuf_;
+    float *analOut = analbufOut_;
+    float *tempInput = input_;
+    float *analWindow = analwinbuf_ + analWinLen;
+    float *tempOldInPhase = oldInPhase_;
     float angleDif,real,imag,phase;
     float rratio;
 
     got = fsig_.overlap;      /*always assume */
-    fp = overlapbuf;
-    tocp = (got<= tempInput + buflen - nextIn ? got : tempInput + buflen - nextIn);
+    fp = overlapbuf_;
+    tocp = (got<= tempInput + buflen_ - nextIn_ ? got : tempInput + buflen_ - nextIn_);
     got -= tocp;
     while (tocp-- > 0)
-      *(nextIn++) = *fp++;
+      *(nextIn_++) = *fp++;
 
     if (got > 0) {
-      nextIn -= buflen;
+      nextIn_ -= buflen_;
       while (got-- > 0)
-        *nextIn++ = *fp++;
+        *nextIn_++ = *fp++;
     }
-    if (nextIn >= (tempInput + buflen))
-      nextIn -= buflen;
+    if (nextIn_ >= (tempInput + buflen_))
+      nextIn_ -= buflen_;
 
     /* analysis: The analysis subroutine computes the complex output at
        time n of (N/2 + 1) of the phase vocoder channels.  It operates
@@ -547,15 +572,15 @@ void SpectralAnalyzer::UpdateFrame()
      *(anal + i) = FL(0.0);  */     /*initialize*/
     memset(anal, 0, sizeof(float)*(N+2));
 
-    j = (nI - analWinLen - 1 + buflen) % buflen;     /*input pntr*/
+    j = (nI_ - analWinLen - 1 + buflen_) % buflen_;     /*input pntr*/
 
-    k = nI - analWinLen - 1;                 /*time shift*/
+    k = nI_ - analWinLen - 1;                 /*time shift*/
     while (k < 0)
       k += N;
     k = k % N;
     for (i = -analWinLen; i <= analWinLen; i++) {
-      if (++j >= buflen)
-        j -= buflen;
+      if (++j >= buflen_)
+        j -= buflen_;
       if (++k >= N)
         k -= N;
       /* *(anal + k) += *(analWindow + i) * *(input + j); */
@@ -569,7 +594,12 @@ void SpectralAnalyzer::UpdateFrame()
     // }
     // else
     //   csound->RealFFTnp2(csound, anal, N);
-    if (N != WINDOW_SIZE::MAX)
+
+    //////////////////////////////////////////////////////////
+    // Custom FFT section
+    //////////////////////////////////////////////////////////
+    
+    if (N != FFT::MAX_SIZE)
     {
       int num_passes = GetPasses(N);
       fft_.Direct(anal, analOut, num_passes);
@@ -579,6 +609,10 @@ void SpectralAnalyzer::UpdateFrame()
       fft_.Direct(anal, analOut);
     }
     Interlace(analOut, anal, N);
+
+    //////////////////////////////////////////////////////////
+    // Custom FFT section end
+    //////////////////////////////////////////////////////////
 
     /* conversion: The real and imaginary values in anal are converted to
        magnitude and angle-difference-per-second (assuming an
@@ -608,7 +642,7 @@ void SpectralAnalyzer::UpdateFrame()
         angleDif = angleDif + TWOPI_F;
 
       /* add in filter center freq.*/
-      /* *i1 */ anal[ii+1]  = angleDif * RoverTwoPi + ((float) i * Fexact);
+      /* *i1 */ anal[ii+1]  = angleDif * RoverTwoPi_ + ((float) i * Fexact_);
 
     }
     /* } */
@@ -619,22 +653,22 @@ void SpectralAnalyzer::UpdateFrame()
       /* *ofp++ = (float)(*fp++); */
       ofp[i] = (float) fp[i];
 
-    nI += fsig_.overlap;                          /* increment time */
-    if (nI > (synWinLen + fsig_.overlap))
-      Ii = /*I*/fsig_.overlap;
+    nI_ += fsig_.overlap;                          /* increment time */
+    if (nI_ > (synWinLen + fsig_.overlap))
+      Ii_ = /*I*/fsig_.overlap;
     else
-      if (nI > synWinLen)
-        Ii = nI - synWinLen;
+      if (nI_ > synWinLen)
+        Ii_ = nI_ - synWinLen;
       else {
-        Ii = 0;
+        Ii_ = 0;
 
-        /*  for (i=nO+synWinLen; i<buflen; i++)
+        /*  for (i=nO+synWinLen; i<buflen_; i++)
             if (i > 0)
             *(output+i) = 0.0f;
             */
       }
 
-    IOi = Ii;
+    IOi_ = Ii_;
 }
 
 void SpectralAnalyzer::Interlace(float* fftSeparated, float* targetBuffer, const int length) {

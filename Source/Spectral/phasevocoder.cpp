@@ -8,6 +8,7 @@ using namespace daicsp;
 
 void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
 {
+    status_ = STATUS::OK;
     sr_ = sampleRate;
 
     float *analwinhalf;
@@ -18,22 +19,23 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
     int i, Mf, Lf;
     double IO;
 
-    /* get params from input fsig */
+    /* get params from input_ fsig */
     /* we TRUST they are legal */
     int N = fsig.N;
     int overlap = fsig.overlap;
     int M = fsig.winsize;
     int wintype = fsig.wintype;
 
-    // TODO -- ensure these are not necessary
+    // NOTE -- these would be useful for in-depth error checking
     // p->fftsize = N;
     // p->winsize = M;
     // p->overlap = overlap;
     // p->wintype = wintype;
     // p->format = fsig.format;
 
+    // NOTE -- sliding not yet implemented
     if (fsig.sliding) {
-      /* get params from input fsig */
+      /* get params from input_ fsig */
       /* we TRUST they are legal */
     //   int wintype = fsig.wintype;
       /* and put into locals */
@@ -41,17 +43,19 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
     //   format = fsig.format;
         //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->oldOutPhase);
         //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->output);
+
+      // NOTE -- sliding not currently implemented
+      status_ = STATUS::SLIDING_NOT_IMPLEMENTED;
+      return;
+
+      fft_.Init();
       return;
     }
 
     /* and put into locals */
     halfwinsize = M/2;
-    buflen = M*4;
+    buflen_ = M*4;
     IO = (double)overlap;         /* always, no time-scaling possible */
-
-    // TODO -- check what csound->esr is
-    // float arate = csound->esr / (float) overlap;
-    // float fund = csound->esr / (float) N;
 
     float arate = sr_ / (float) overlap;
     // float fund = sr_ / (float) N;
@@ -60,16 +64,16 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
 
     Lf = Mf = 1 - M%2;
 
-    // TODO -- take note of these and how they may affect static allocation
+    // NOTE -- take note of these and how they may affect static allocation
     // /* deal with iinit later on! */
-    // csound->AuxAlloc(csound, overlap * sizeof(float), &p->overlapbuf);
+    // csound->AuxAlloc(csound, overlap * sizeof(float), &p->overlapbuf_);
     // csound->AuxAlloc(csound, (N+2) * sizeof(float), &p->synbuf);
-    // csound->AuxAlloc(csound, (M+Mf) * sizeof(float), &p->analwinbuf);
+    // csound->AuxAlloc(csound, (M+Mf) * sizeof(float), &p->analwinbuf_);
     // csound->AuxAlloc(csound, (M+Mf) * sizeof(float), &p->synwinbuf);
     // csound->AuxAlloc(csound, nBins * sizeof(float), &p->oldOutPhase);
-    // csound->AuxAlloc(csound, buflen * sizeof(float), &p->output);
+    // csound->AuxAlloc(csound, buflen_ * sizeof(float), &p->output);
 
-    synwinhalf = synwinbuf + halfwinsize;
+    synwinhalf = synwinbuf_ + halfwinsize;
 
     /* synthesis windows */
     if (M <= N) {
@@ -96,7 +100,7 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
      /* have to make analysis window to get amp scaling */
     /* so this ~could~ be a local alloc and free...*/
       double dN = (double)N;
-      analwinhalf = analwinbuf + halfwinsize;
+      analwinhalf = analwinbuf_ + halfwinsize;
     SpectralWindow(analwinhalf, wintype, M);
 
     for (i = 1; i <= halfwinsize; i++){
@@ -147,15 +151,15 @@ void PhaseVocoder::Init(SpectralBuffer fsig, size_t sampleRate, size_t block)
       *(synwinhalf + i) *= sum;
 
 /*  p->invR = FL(1.0) / csound->esr; */
-    RoverTwoPi = arate / TWOPI_F;
-    TwoPioverR = TWOPI_F / arate;
-    // Fexact =  csound->esr / (float)N;
-    Fexact = sr_ / (float) N;
-    nO = -(halfwinsize / overlap) * overlap; /* input time (in samples) */
-    Ii = 0;                          /* number of new outputs to write */
-    IOi = 0;
-    outptr = 0;
-    nextOut = output;
+    RoverTwoPi_ = arate / TWOPI_F;
+    TwoPioverR_ = TWOPI_F / arate;
+    // Fexact_ =  csound->esr / (float)N;
+    Fexact_ = sr_ / (float) N;
+    nO_ = -(halfwinsize / overlap) * overlap; /* input_ time (in samples) */
+    Ii_ = 0;                          /* number of new outputs to write */
+    IOi_ = 0;
+    outptr_ = 0;
+    nextOut_ = output_;
 
     // if (!(N & (N - 1))) /* if pow of two use this */
     //   p->setup = csound->RealFFT2Setup(csound,N,FFT_INV);
@@ -177,33 +181,34 @@ float* PhaseVocoder::Process(SpectralBuffer &fsig, size_t size)
     //   return csound->PerfError(csound,&(h),
     //                            Str("pvsynth: Not Initialised.\n"));
     // }
-    
-    if (fsig.sliding)
-    {
-        Analyze(fsig, size);
-        return outputBuffer;
-    } 
 
-    // TODO -- could these be useful for handling 
+    // NOTE -- could these be useful for handling 
     // if (offset) memset(outputBuffer, '\0', offset*sizeof(float));
     // if (early) {
     //   nsmps -= early;
     //   memset(&outputBuffer[nsmps], '\0', early*sizeof(float));
     // }
-    for (i=offset; i<nsmps; i++)
-      outputBuffer[i] = Tick(fsig);
-    // return OK;
-    return outputBuffer;
+    if (fsig.sliding)
+    {
+      ProcessSliding(fsig, size);
+    }
+    else
+    {
+      for (i=offset; i<nsmps; i++)
+      outputBuffer_[i] = Tick(fsig);
+    }
+    
+    return outputBuffer_;
 }
 
-void PhaseVocoder::Analyze(SpectralBuffer& fsig, size_t size) 
+void PhaseVocoder::ProcessSliding(SpectralBuffer& fsig, size_t size) 
 {
     int i, k;
     int ksmps = size;
     int N = fsig.N;
     int NB = fsig.NB;
     Complex *ff;
-    float *h = oldOutPhase;
+    float *h = oldOutPhase_;
 
     /* Get real part from AMP/FREQ */
     for (i=0; i<ksmps; i++) {
@@ -214,38 +219,38 @@ void PhaseVocoder::Analyze(SpectralBuffer& fsig, size_t size)
 
         tmp = ff[k].b; /* Actually frequency */
         /* subtract bin mid frequency */
-        tmp -= (float)k * sr_/N;
+        tmp -= (float) k * sr_ / N;
         /* get bin deviation from freq deviation */
         tmp *= TWOPI_F / sr_;
         /* add the overlap phase advance back in */
         tmp += (float)k*TWOPI_F/N;
         h[k] = phase = mod2Pi(h[k] + tmp);
-        output[k] = ff[k].a*cos(phase);
+        output_[k] = ff[k].a*cos(phase);
       }
       a = 0.0f;
       for (k=1; k<NB-1; k++) {
-        a -= output[k];
-        if (k+1<NB-1) a+=output[++k];
+        a -= output_[k];
+        if (k+1<NB-1) a+=output_[++k];
       }
-      outputBuffer[i] = (a+a+output[0]-output[NB-1])/N;
+      outputBuffer_[i] = (a+a+output_[0]-output_[NB-1])/N;
     }
 }
 
 float PhaseVocoder::Tick(SpectralBuffer& fsig) 
 {
-    if (outptr == fsig.overlap) {
-      UpdateFrame(fsig);
-      outptr = 0;
+    if (outptr_ == fsig.overlap) {
+      GenerateFrame(fsig);
+      outptr_ = 0;
     }
-    return overlapbuf[outptr++];
+    return overlapbuf_[outptr_++];
 }
 
-void PhaseVocoder::UpdateFrame(SpectralBuffer& fsig)
+void PhaseVocoder::GenerateFrame(SpectralBuffer& fsig)
 {
     int i,j,k,ii,NO,NO2;
     float *anal;                                        /* RWD MUST be 32bit */
     float *syn;
-    float *tempOldOutPhase = oldOutPhase;
+    float *tempOldOutPhase = oldOutPhase_;
     int N = fsig.N;
     float *obufptr,*outbuf,*synWindow;
     float mag,phase,angledif, the_phase;
@@ -258,11 +263,11 @@ void PhaseVocoder::UpdateFrame(SpectralBuffer& fsig)
 
     NO = N;        /* always the same */
     NO2 = NO/2;
-    syn = synbuf;
+    syn = synbuf_;
     anal = fsig.frame;             /* RWD MUST be 32bit */
     // output = (float *) (output.auxp);
-    outbuf = overlapbuf;
-    synWindow = synwinbuf + synWinLen;
+    outbuf = overlapbuf_;
+    synWindow = synwinbuf_ + synWinLen;
 
     /* reconversion: The magnitude and angle-difference-per-second in syn
        (assuming an intermediate sampling rate of rOut) are
@@ -287,9 +292,9 @@ void PhaseVocoder::UpdateFrame(SpectralBuffer& fsig)
     /* this is spread across several frame cycles, as the problem does not
         develop for a while */
 
-    angledif = TwoPioverR * ( /* *i1 */ syn[ii+1] - ((float)i * Fexact));
+    angledif = TwoPioverR_ * ( /* *i1 */ syn[ii+1] - ((float)i * Fexact_));
     the_phase = /* *(oldOutPhase + i) */ tempOldOutPhase[i] + angledif;
-    if (i== bin_index)
+    if (i== bin_index_)
         the_phase = (float) fmod(the_phase,TWOPI_F);
     /* *(oldOutPhase + i) = the_phase; */
     tempOldOutPhase[i] = the_phase;
@@ -299,8 +304,8 @@ void PhaseVocoder::UpdateFrame(SpectralBuffer& fsig)
     }
 
     /* for phase normalization */
-    if (++(bin_index) == NO2+1)
-      bin_index = 0;
+    if (++(bin_index_) == NO2+1)
+      bin_index_ = 0;
 
     /* else it must be PVOC_COMPLEX */
 
@@ -323,80 +328,88 @@ void PhaseVocoder::UpdateFrame(SpectralBuffer& fsig)
     // else
     //   csound->InverseRealFFTnp2(csound, syn, NO);
 
-    Deinterlace(syn, synbufOut, NO);
-    if (NO != WINDOW_SIZE::MAX)
+    //////////////////////////////////////////////////////////
+    // Custom FFT section
+    //////////////////////////////////////////////////////////
+
+    Deinterlace(syn, synbufOut_, NO);
+    if (NO != FFT::MAX_SIZE)
     {
       int num_passes = GetPasses(NO);
-      fft_.Inverse(syn, synbufOut, num_passes);
+      fft_.Inverse(syn, synbufOut_, num_passes);
     }
     else
     {
-      fft_.Inverse(syn, synbufOut);
+      fft_.Inverse(syn, synbufOut_);
     }
     // NOTE -- shy_fft outputs raw inverse values, ranging from +- the 
     // size of the fft. Also, it outputs to a second buffer, but we
     // want to use the first one (syn)
     for (int n = 0; n < NO; n++) {
-        syn[n] = synbufOut[n] / NO;
+        syn[n] = synbufOut_[n] / NO;
     }
 
-    j = nO - synWinLen - 1;
-    while (j < 0)
-      j += buflen;
-    j = j % buflen;
+    //////////////////////////////////////////////////////////
+    // Custom FFT section end
+    //////////////////////////////////////////////////////////
 
-    k = nO - synWinLen - 1;
+    j = nO_ - synWinLen - 1;
+    while (j < 0)
+      j += buflen_;
+    j = j % buflen_;
+
+    k = nO_ - synWinLen - 1;
     while (k < 0)
       k += NO;
     k = k % NO;
 
     for (i = -synWinLen; i <= synWinLen; i++) { /*overlap-add*/
-      if (++j >= buflen)
-        j -= buflen;
+      if (++j >= buflen_)
+        j -= buflen_;
       if (++k >= NO)
         k -= NO;
       /* *(output + j) += *(syn + k) * *(synWindow + i); */
-      output[j] += syn[k] * synWindow[i];
+      output_[j] += syn[k] * synWindow[i];
     }
 
     obufptr = outbuf;
 
-    for (i = 0; i < IOi;) {  /* shift out next IOi values */
-      int todo = (IOi-i <= output+buflen - nextOut ?
-                  IOi-i : output+buflen - nextOut);
+    for (i = 0; i < IOi_;) {  /* shift out next IOi_ values */
+      int todo = (IOi_-i <= output_+buflen_ - nextOut_ ?
+                  IOi_-i : output_+buflen_ - nextOut_);
       /*outfloats(nextOut, todo, ofd);*/
       /*copy data to external buffer */
       /*for (n=0;n < todo;n++)
        *obufptr++ = nextOut[n]; */
-      memcpy(obufptr, nextOut, sizeof(float)*todo);
+      memcpy(obufptr, nextOut_, sizeof(float)*todo);
       obufptr += todo;
 
       i += todo;
 
       /* for (j = 0; j < todo; j++)
        *nextOut++ = 0.0f; */
-      memset(nextOut, 0, sizeof(float)*todo);
-      nextOut += todo;
+      memset(nextOut_, 0, sizeof(float)*todo);
+      nextOut_ += todo;
 
-      if (nextOut >= (output + buflen))
-        nextOut -= buflen;
+      if (nextOut_ >= (output_ + buflen_))
+        nextOut_ -= buflen_;
     }
 
     /* increment time */
-    nO += overlap;
+    nO_ += overlap;
 
-    if (nO > (synWinLen + /*I*/overlap))
-      Ii = overlap;
+    if (nO_ > (synWinLen + /*I*/overlap))
+      Ii_ = overlap;
     else
-      if (nO > synWinLen)
-        Ii = nO - synWinLen;
+      if (nO_ > synWinLen)
+        Ii_ = nO_ - synWinLen;
       else {
-        Ii = 0;
-        for (i=nO+synWinLen; i<buflen; i++)
+        Ii_ = 0;
+        for (i=nO_+synWinLen; i<buflen_; i++)
           if (i > 0)
-            output[i] = 0.0f;
+            output_[i] = 0.0f;
       }
-    IOi =  Ii;
+    IOi_ =  Ii_;
 }
 
 void PhaseVocoder::Deinterlace(float* interlaced, float* workingBuffer, const int length) 

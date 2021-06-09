@@ -5,8 +5,25 @@
 namespace daicsp
 {
 
-enum WINDOW_SIZE {
-    MAX = 2048,
+#define __MAX_FFT__ 4096
+
+enum FFT {
+    MAX_SIZE    = __MAX_FFT__,
+    MAX_WINDOW  = __MAX_FFT__ + 1,
+    MAX_FLOATS  = __MAX_FFT__ + 2,
+    MAX_BINS    = __MAX_FFT__ / 2 + 1,
+    MAX_OVERLAP = __MAX_FFT__ / 2,
+    MAX_FRAMES  = __MAX_FFT__ * 4,
+    
+    // NOTE -- This is a temporary measure to ensure
+    // the appropriate buffers have enough space for
+    // sliding and non-sliding applications. It is
+    // derived from: numBins * audioBlock
+    // Needless to say, this is a temporary hack and 
+    // needs a better solution since the audio block
+    // size may not be known at compile time. 
+    // (this assumes 48)
+    MAX_SLIDE_SIZE = 4704,
 };
 
 enum SPECTRAL_WINDOW {
@@ -38,7 +55,7 @@ typedef struct {
     int wintype;
     int format;
     unsigned int framecount;
-    float frame[WINDOW_SIZE::MAX];
+    float frame[FFT::MAX_FLOATS];
 } SpectralBuffer;
 
 
