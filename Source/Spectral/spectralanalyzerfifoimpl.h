@@ -1,30 +1,28 @@
+#include <cstddef>
 #include <math.h>
 #include <string.h>
-#include "dsp.h"
+
 #include "spectral.h"
-#include "spectralanalyzer.h"
-// #include "shy_fft.h"
 
-using namespace daicsp;
-
-void SpectralAnalyzer::Init(int             fftsize,
-                            int             overlap,
-                            int             windowSize,
-                            SPECTRAL_WINDOW windowType,
-                            size_t          sampleRate,
-                            size_t          blockSize)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
+    SPECTRAL_WINDOW windowType,
+    size_t          sampleRate,
+    size_t          blockSize)
 {
     status_ = STATUS::OK;
+    state_  = STATE::INIT;
 
     float *analwinhalf, *analwinbase;
     float  sum;
     int    halfwinsize;
     int    i, Mf /*,Lf*/;
 
-    unsigned int N = fftsize;
-    unsigned int M = windowSize;
+    unsigned int N       = FFT_SIZE;
+    unsigned int M       = WINDOW_SIZE;
+    unsigned int overlap = OVERLAP;
 
-    if(overlap < (int)blockSize || overlap <= 10) /* 10 is a guess.... */
+    if(overlap < blockSize || overlap <= 10) /* 10 is a guess.... */
     {
         // return pvssanalset(csound, p);
 
@@ -32,8 +30,7 @@ void SpectralAnalyzer::Init(int             fftsize,
         status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
         return;
 
-        InitSliding(
-            fftsize, overlap, windowSize, windowType, sampleRate, blockSize);
+        InitSliding(windowType, sampleRate, blockSize);
         return;
     }
 
@@ -45,15 +42,10 @@ void SpectralAnalyzer::Init(int             fftsize,
 
     if(N <= 32)
     {
-        status_ = STATUS::W_FFT_TOO_SMALL;
-        N       = 64;
+        status_ = STATUS::E_FFT_TOO_SMALL;
+        return;
         // return csound->InitError(csound,
         //                          Str("pvsanal: fftsize of 32 is too small!\n"));
-    }
-    else if(N > FFT::MAX_SIZE)
-    {
-        status_ = STATUS::W_FFT_TOO_BIG;
-        N       = FFT::MAX_SIZE;
     }
 
     /* check N for powof2? CARL fft routines and FFTW are not limited to that */
@@ -63,22 +55,24 @@ void SpectralAnalyzer::Init(int             fftsize,
     {
         //  csound->Warning(csound,
         //                          Str("pvsanal: window size too small for fftsize"));
-        status_ = STATUS::W_WINDOW_TOO_SMALL;
-        M       = N;
-    }
-    else if(M > FFT::MAX_SIZE)
-    {
-        status_ = STATUS::W_WINDOW_TOO_BIG;
-        M       = FFT::MAX_SIZE;
+        status_ = STATUS::E_WINDOW_TOO_SMALL;
+        return;
     }
 
-    if(overlap > (int)N / 2)
+    if(overlap > N / 2)
     {
         status_ = STATUS::W_OVERLAP_TOO_BIG;
         overlap = (int)N / 2;
         // return csound->InitError(csound,
         //                          Str("pvsanal: overlap too big for fft size\n"));
     }
+
+    halfOverlap_  = overlap;
+    inputSegment_ = overlapbuf_;
+    // Initially, the analyzer will be idle, waiting for
+    // the input to be filled. When it's actually processing,
+    // the processSegment_ and inputSegment_ will be different.
+    processSegment_ = inputSegment_;
 
     // NOTE -- only Hamming and Hann are supported
     if(windowType != SPECTRAL_WINDOW::HAMMING
@@ -175,21 +169,20 @@ void SpectralAnalyzer::Init(int             fftsize,
     fft_.Init();
 }
 
-void SpectralAnalyzer::InitSliding(int             fftsize,
-                                   int             overlap,
-                                   int             windowSize,
-                                   SPECTRAL_WINDOW windowType,
-                                   size_t          sampleRate,
-                                   size_t          block)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::InitSliding(
+    SPECTRAL_WINDOW windowType,
+    size_t          sampleRate,
+    size_t          block)
 {
     /* opcode params */
-    int N = windowSize;
+    int N = WINDOW_SIZE;
     int NB;
     int i;
 
     if(N <= 0)
     {
-        status_ = STATUS::W_WINDOW_TOO_SMALL;
+        status_ = STATUS::E_WINDOW_TOO_SMALL;
         return;
     }
     // if (N<=0) return csound->InitError(csound, Str("Invalid window size"));
@@ -262,42 +255,95 @@ void SpectralAnalyzer::InitSliding(int             fftsize,
     // fft_.Init();
 }
 
-SpectralBuffer<FFT::MAX_FLOATS + 2> &SpectralAnalyzer::Process(const float *in,
-                                                               size_t size)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+SpectralBuffer<FFT_SIZE + 2> &
+SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process()
 {
-    // float *ain;
-    // unsigned int offset = h.insdshead->ksmps_offset;
-    // unsigned int early  = h.insdshead->ksmps_no_end;
-    // unsigned int i, nsmps = block;
-    unsigned int early  = 0;
-    unsigned int offset = 0;
-    unsigned int i, nsmps = size;
-
-    // ain = ain;
-
-    // NOTE -- keep this in mind if we decide to dynamically allocate
-    // if (input.auxp==NULL) {
-    //   return csound->PerfError(csound,&(h),
-    //                            Str("pvsanal: Not Initialised.\n"));
-    // }
-    // overlap is a pointer to a buffer, so no need to cast?
-    // int over = (int)*overlap;
-    if(fsig_.overlap < (int)nsmps || fsig_.overlap < 10)
-    {
-        ProcessSliding(in, size);
-    }
-    else
-    {
-        nsmps -= early;
-
-        for(i = offset; i < nsmps; i++)
-            Tick(in[i]);
-    }
-
+    while(state_ != STATE::PROCESSING) {}
+    GenerateFrame();
+    state_ = STATE::IDLE;
+    fsig_.framecount++;
     return fsig_;
+
+
+    // // float *ain;
+    // // unsigned int offset = h.insdshead->ksmps_offset;
+    // // unsigned int early  = h.insdshead->ksmps_no_end;
+    // // unsigned int i, nsmps = block;
+    // unsigned int early  = 0;
+    // unsigned int offset = 0;
+    // unsigned int i, nsmps = size;
+
+    // // ain = ain;
+
+    // // NOTE -- keep this in mind if we decide to dynamically allocate
+    // // if (input.auxp==NULL) {
+    // //   return csound->PerfError(csound,&(h),
+    // //                            Str("pvsanal: Not Initialised.\n"));
+    // // }
+    // // overlap is a pointer to a buffer, so no need to cast?
+    // // int over = (int)*overlap;
+    // if(fsig_.overlap < (int)nsmps || fsig_.overlap < 10)
+    // {
+    //     ProcessSliding(in, size);
+    // }
+    // else
+    // {
+    //     nsmps -= early;
+
+    //     for(i = offset; i < nsmps; i++)
+    //         Tick(in[i]);
+    // }
+
+    // return fsig_;
 }
 
-void SpectralAnalyzer::ProcessSliding(const float *in, size_t size)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample(float sample)
+{
+    if(inptr_ == fsig_.overlap)
+    {
+        inptr_ = 0;
+        switch(state_)
+        {
+            case STATE::INIT:
+                inputSegment_ = overlapbuf_ + halfOverlap_;
+                state_        = STATE::PROCESSING;
+                break;
+            case STATE::IDLE:
+                inputSegment_ = (inputSegment_ == overlapbuf_)
+                                    ? overlapbuf_ + halfOverlap_
+                                    : overlapbuf_;
+                processSegment_ = (processSegment_ == overlapbuf_)
+                                      ? overlapbuf_ + halfOverlap_
+                                      : overlapbuf_;
+                state_ = STATE::PROCESSING;
+                break;
+            case STATE::PROCESSING: status_ = STATUS::W_BUFFER_UNDERFLOW; break;
+            default: status_ = STATUS::W_INVALID_STATE; break;
+        }
+    }
+
+    inputSegment_[inptr_++] = sample;
+}
+
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(float sample)
+{
+    if(inptr_ == fsig_.overlap)
+    {
+        GenerateFrame();
+        fsig_.framecount++;
+        inptr_ = 0;
+    }
+    //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
+    overlapbuf_[inptr_++] = sample;
+}
+
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
+    const float *in,
+    size_t       size)
 {
     // float *ain;
     int      NB   = Ii_, loc;
@@ -559,19 +605,8 @@ void SpectralAnalyzer::ProcessSliding(const float *in, size_t size)
     // return OK;
 }
 
-void SpectralAnalyzer::Tick(float sample)
-{
-    if(inptr_ == fsig_.overlap)
-    {
-        GenerateFrame();
-        fsig_.framecount++;
-        inptr_ = 0;
-    }
-    //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
-    overlapbuf_[inptr_++] = sample;
-}
-
-void SpectralAnalyzer::GenerateFrame()
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
 {
     int    got, tocp, i, j, k, ii;
     int    N          = fsig_.N;
@@ -588,8 +623,9 @@ void SpectralAnalyzer::GenerateFrame()
     float  angleDif, real, imag, phase;
     float  rratio;
 
-    got  = fsig_.overlap; /*always assume */
-    fp   = overlapbuf_;
+    got = fsig_.overlap; /*always assume */
+    // fp   = overlapbuf_;
+    fp   = processSegment_;
     tocp = (got <= tempInput + buflen_ - nextIn_
                 ? got
                 : tempInput + buflen_ - nextIn_);
@@ -650,7 +686,7 @@ void SpectralAnalyzer::GenerateFrame()
     // Custom FFT section
     //////////////////////////////////////////////////////////
 
-    if(N != FFT::MAX_SIZE)
+    if(N != FFT_SIZE)
     {
         int num_passes = GetPasses(N);
         fft_.Direct(anal, analOut, num_passes);
@@ -727,9 +763,11 @@ void SpectralAnalyzer::GenerateFrame()
     IOi_ = Ii_;
 }
 
-void SpectralAnalyzer::Interlace(float *   fftSeparated,
-                                 float *   targetBuffer,
-                                 const int length)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Interlace(
+    float *   fftSeparated,
+    float *   targetBuffer,
+    const int length)
 {
     // unfortunately, interleaving in place is not trivial, so another buffer will have to do
     int halflen = length / 2;

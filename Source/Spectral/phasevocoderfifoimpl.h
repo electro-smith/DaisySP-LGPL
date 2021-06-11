@@ -1,16 +1,14 @@
-#include <math.h>
-#include <string.h>
-#include "dsp.h"
-#include "phasevocoder.h"
+#include <cstddef>
 #include "spectral.h"
 
-using namespace daicsp;
-
-void PhaseVocoder::Init(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
-                        size_t                               sampleRate,
-                        size_t                               block)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
+    SpectralBuffer<FFT_SIZE + 2> &fsig,
+    size_t                        sampleRate,
+    size_t                        block)
 {
     status_ = STATUS::OK;
+    state_  = STATE::INIT;
     sr_     = sampleRate;
 
     float *analwinhalf;
@@ -23,10 +21,18 @@ void PhaseVocoder::Init(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
 
     /* get params from input_ fsig */
     /* we TRUST they are legal */
-    int N       = fsig.N;
-    int overlap = fsig.overlap;
-    int M       = fsig.winsize;
+    // int N       = fsig.N;
+    // int overlap = fsig.overlap;
+    // int M       = fsig.winsize;
+    // TODO -- add error checking for these
+    int N       = FFT_SIZE;
+    int overlap = OVERLAP;
+    int M       = WINDOW_SIZE;
     int wintype = fsig.wintype;
+
+    halfOverlap_    = overlap;
+    outputSegment_  = overlapbuf_;
+    processSegment_ = overlapbuf_;
 
     // NOTE -- these would be useful for in-depth error checking
     // p->fftsize = N;
@@ -48,7 +54,7 @@ void PhaseVocoder::Init(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
         //   csound->AuxAlloc(csound, fsig.NB * sizeof(double), &p->output);
 
         // NOTE -- sliding not currently implemented
-        status_ = STATUS::SLIDING_NOT_IMPLEMENTED;
+        status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
         return;
 
         fft_.Init();
@@ -178,91 +184,131 @@ void PhaseVocoder::Init(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
     fft_.Init();
 }
 
-float *PhaseVocoder::Process(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
-                             size_t                               size)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample()
 {
-    // int offset = h.insdshead->ksmps_offset;
-    // int early  = h.insdshead->ksmps_no_end;
-    int offset = 0;
-    // int early = 0;
-
-    int i, nsmps = size;
-
-    // if (output.auxp==NULL) {
-    //   return csound->PerfError(csound,&(h),
-    //                            Str("pvsynth: Not Initialised.\n"));
-    // }
-
-    // NOTE -- could these be useful for handling
-    // if (offset) memset(outputBuffer, '\0', offset*sizeof(float));
-    // if (early) {
-    //   nsmps -= early;
-    //   memset(&outputBuffer[nsmps], '\0', early*sizeof(float));
-    // }
-    if(fsig.sliding)
+    if(outptr_ == halfOverlap_)
     {
-        ProcessSliding(fsig, size);
-    }
-    else
-    {
-        for(i = offset; i < nsmps; i++)
-            outputBuffer_[i] = Tick(fsig);
+        outptr_ = 0;
+        switch(state_)
+        {
+            case STATE::INIT:
+                outputSegment_ = overlapbuf_ + halfOverlap_;
+                state_         = STATE::PROCESSING;
+                break;
+            case STATE::IDLE:
+                outputSegment_ = (outputSegment_ == overlapbuf_)
+                                     ? overlapbuf_ + halfOverlap_
+                                     : overlapbuf_;
+                processSegment_ = (processSegment_ == overlapbuf_)
+                                      ? overlapbuf_ + halfOverlap_
+                                      : overlapbuf_;
+                state_ = STATE::PROCESSING;
+                break;
+            case STATE::PROCESSING: status_ = STATUS::W_BUFFER_UNDERFLOW; break;
+            default: status_ = STATUS::W_INVALID_STATE; break;
+        }
     }
 
-    return outputBuffer_;
+    return outputSegment_[outptr_++];
 }
 
-void PhaseVocoder::ProcessSliding(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig,
-                                  size_t                               size)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
+    SpectralBuffer<FFT_SIZE + 2> &fsig)
 {
-    int      i, k;
-    int      ksmps = size;
-    int      N     = fsig.N;
-    int      NB    = fsig.NB;
-    Complex *ff;
-    float *  h = oldOutPhase_;
+    // // int offset = h.insdshead->ksmps_offset;
+    // // int early  = h.insdshead->ksmps_no_end;
+    // int offset = 0;
+    // // int early = 0;
 
-    /* Get real part from AMP/FREQ */
-    for(i = 0; i < ksmps; i++)
-    {
-        float a;
-        ff = (Complex *)(fsig.frame) + i * NB;
-        for(k = 0; k < NB; k++)
-        {
-            float tmp, phase;
+    // int i, nsmps = size;
 
-            tmp = ff[k].b; /* Actually frequency */
-            /* subtract bin mid frequency */
-            tmp -= (float)k * sr_ / N;
-            /* get bin deviation from freq deviation */
-            tmp *= TWOPI_F / sr_;
-            /* add the overlap phase advance back in */
-            tmp += (float)k * TWOPI_F / N;
-            h[k] = phase = mod2Pi(h[k] + tmp);
-            output_[k]   = ff[k].a * cos(phase);
-        }
-        a = 0.0f;
-        for(k = 1; k < NB - 1; k++)
-        {
-            a -= output_[k];
-            if(k + 1 < NB - 1)
-                a += output_[++k];
-        }
-        outputBuffer_[i] = (a + a + output_[0] - output_[NB - 1]) / N;
-    }
+    // // if (output.auxp==NULL) {
+    // //   return csound->PerfError(csound,&(h),
+    // //                            Str("pvsynth: Not Initialised.\n"));
+    // // }
+
+    // // NOTE -- could these be useful for handling
+    // // if (offset) memset(outputBuffer, '\0', offset*sizeof(float));
+    // // if (early) {
+    // //   nsmps -= early;
+    // //   memset(&outputBuffer[nsmps], '\0', early*sizeof(float));
+    // // }
+    // if(fsig.sliding)
+    // {
+    //     ProcessSliding(fsig, size);
+    // }
+    // else
+    // {
+    //     for(i = offset; i < nsmps; i++)
+    //         outputBuffer_[i] = Tick(fsig);
+    // }
+
+    // return outputBuffer_;
+
+    while(state_ != STATE::PROCESSING) {}
+    GenerateFrame(fsig);
+    state_ = STATE::IDLE;
 }
 
-float PhaseVocoder::Tick(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(
+    SpectralBuffer<FFT_SIZE + 2> &fsig)
 {
     if(outptr_ == fsig.overlap)
     {
         GenerateFrame(fsig);
         outptr_ = 0;
     }
-    return overlapbuf_[outptr_++];
+    return outputSegment_[outptr_++];
 }
 
-void PhaseVocoder::GenerateFrame(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
+    SpectralBuffer<FFT_SIZE + 2> &fsig,
+    size_t                        size)
+{
+    // int      i, k;
+    // int      ksmps = size;
+    // int      N     = fsig.N;
+    // int      NB    = fsig.NB;
+    // Complex *ff;
+    // float *  h = oldOutPhase_;
+
+    // /* Get real part from AMP/FREQ */
+    // for(i = 0; i < ksmps; i++)
+    // {
+    //     float a;
+    //     ff = (Complex *)(fsig.frame) + i * NB;
+    //     for(k = 0; k < NB; k++)
+    //     {
+    //         float tmp, phase;
+
+    //         tmp = ff[k].b; /* Actually frequency */
+    //         /* subtract bin mid frequency */
+    //         tmp -= (float)k * sr_ / N;
+    //         /* get bin deviation from freq deviation */
+    //         tmp *= TWOPI_F / sr_;
+    //         /* add the overlap phase advance back in */
+    //         tmp += (float)k * TWOPI_F / N;
+    //         h[k] = phase = mod2Pi(h[k] + tmp);
+    //         output_[k]   = ff[k].a * cos(phase);
+    //     }
+    //     a = 0.0f;
+    //     for(k = 1; k < NB - 1; k++)
+    //     {
+    //         a -= output_[k];
+    //         if(k + 1 < NB - 1)
+    //             a += output_[++k];
+    //     }
+    //     outputBuffer_[i] = (a + a + output_[0] - output_[NB - 1]) / N;
+    // }
+}
+
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
+    SpectralBuffer<FFT_SIZE + 2> &fsig)
 {
     int    i, j, k, ii, NO, NO2;
     float *anal; /* RWD MUST be 32bit */
@@ -283,7 +329,7 @@ void PhaseVocoder::GenerateFrame(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig)
     syn  = synbuf_;
     anal = fsig.frame; /* RWD MUST be 32bit */
     // output = (float *) (output.auxp);
-    outbuf    = overlapbuf_;
+    outbuf    = processSegment_;
     synWindow = synwinbuf_ + synWinLen;
 
     /* reconversion: The magnitude and angle-difference-per-second in syn
@@ -438,9 +484,11 @@ void PhaseVocoder::GenerateFrame(SpectralBuffer<FFT::MAX_FLOATS + 2> &fsig)
     IOi_ = Ii_;
 }
 
-void PhaseVocoder::Deinterlace(float *   interlaced,
-                               float *   workingBuffer,
-                               const int length)
+template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Deinterlace(
+    float *   interlaced,
+    float *   workingBuffer,
+    const int length)
 {
     int halflen = length / 2;
 

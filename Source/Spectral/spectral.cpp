@@ -185,11 +185,4 @@ double daicsp::Besseli(double x)
                                                                                  + y * 0.392377e-2)))))))));
     }
     return ans;
-} // int GetPasses(int fft_size) {
-  //     int fft_num_passes_ = 0;
-  //     for(size_t t = fft_size; t > 1; t >>= 1)
-  //     {
-  //         ++fft_num_passes_;
-  //     }
-  //     return fft_num_passes_;
-  // }
+}

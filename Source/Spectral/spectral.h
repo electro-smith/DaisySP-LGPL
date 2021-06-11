@@ -2,6 +2,8 @@
 #ifndef DSY_SPECTRAL_H
 #define DSY_SPECTRAL_H
 
+#include <cstddef>
+
 namespace daicsp
 {
 #define __MAX_FFT__ 4096
@@ -48,7 +50,8 @@ enum SPECTRAL_FORMAT
     TRACKS,
 };
 
-typedef struct
+template <size_t FRAME_SIZE>
+struct SpectralBuffer
 {
     int          N;
     bool         sliding;
@@ -58,9 +61,21 @@ typedef struct
     int          wintype;
     int          format;
     unsigned int framecount;
-    float        frame[FFT::MAX_FLOATS];
-} SpectralBuffer;
+    float        frame[FRAME_SIZE];
+};
 
+// This causes errors somehow
+// Allowing for easy test to ensure fsigIn != fsigOut
+// bool operator==(SpectralBuffer& fsig1, SpectralBuffer& fsig2)
+// {
+//     if(&fsig1 == &fsig2) return true;
+//     else return false;
+// }
+// bool operator!=(SpectralBuffer& fsig1, SpectralBuffer& fsig2)
+// {
+//     if(&fsig1 != &fsig2) return true;
+//     else return false;
+// }
 
 typedef struct
 {
