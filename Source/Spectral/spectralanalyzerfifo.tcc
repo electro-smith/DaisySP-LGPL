@@ -6,9 +6,8 @@
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
-    SPECTRAL_WINDOW windowType,
-    size_t          sampleRate,
-    size_t          blockSize)
+    SPECTRAL_WINDOW window_type,
+    size_t          sample_rate)
 {
     status_ = STATUS::OK;
     state_  = STATE::INIT;
@@ -22,7 +21,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     unsigned int M       = WINDOW_SIZE;
     unsigned int overlap = OVERLAP;
 
-    if(overlap < blockSize || overlap <= 10) /* 10 is a guess.... */
+    if(overlap < 48 || overlap <= 10) /* 10 is a guess.... */
     {
         // return pvssanalset(csound, p);
 
@@ -30,7 +29,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
         status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
         return;
 
-        InitSliding(windowType, sampleRate, blockSize);
+        InitSliding(window_type, sample_rate, 48);
         return;
     }
 
@@ -67,26 +66,26 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
         //                          Str("pvsanal: overlap too big for fft size\n"));
     }
 
-    halfOverlap_  = overlap;
-    inputSegment_ = overlapbuf_;
+    half_overlap_  = overlap;
+    input_segment_ = overlapbuf_;
     // Initially, the analyzer will be idle, waiting for
     // the input to be filled. When it's actually processing,
     // the processSegment_ and inputSegment_ will be different.
-    processSegment_ = inputSegment_;
+    process_segment_ = input_segment_;
 
     // NOTE -- only Hamming and Hann are supported
-    if(windowType != SPECTRAL_WINDOW::HAMMING
-       && windowType != SPECTRAL_WINDOW::HANN)
+    if(window_type != SPECTRAL_WINDOW::HAMMING
+       && window_type != SPECTRAL_WINDOW::HANN)
     {
         status_    = STATUS::W_INVALID_WINDOW;
-        windowType = SPECTRAL_WINDOW::HAMMING;
+        window_type = SPECTRAL_WINDOW::HAMMING;
     }
 
     halfwinsize = M / 2;
     buflen_     = M * 4;
     // arate = (float)(csound->esr / (float) overlap);
     // fund = (float)(csound->esr / (float) N);
-    float arate = (float)(sampleRate / (float)overlap);
+    float arate = (float)(sample_rate / (float)overlap);
     // float fund = (float)(sampleRate / (float) N);
 
     // int nBins = N/2 + 1;
@@ -113,7 +112,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     // if (PVS_CreateWindow(csound, analwinhalf, windowType, M) != OK)
     //   return NOTOK;
 
-    SpectralWindow(analwinhalf, windowType, M);
+    SpectralWindow(analwinhalf, window_type, M);
 
     for(i = 1; i <= halfwinsize; i++)
         *(analwinhalf - i) = *(analwinhalf + i - Mf);
@@ -143,7 +142,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     /*    invR = (float)(FL(1.0) / csound->esr); */
     RoverTwoPi_ = (float)(arate / TWOPI_F);
     TwoPioverR_ = (float)(TWOPI_F / arate);
-    Fexact_     = (float)(sampleRate / (float)N);
+    Fexact_     = (float)(sample_rate / (float)N);
     nI_         = -((int64_t)(halfwinsize / overlap))
           * overlap; /* input time (in samples) */
     /*Dd = halfwinsize + nI_ + 1;                     */
@@ -153,26 +152,26 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     nextIn_ = input_;
     inptr_  = 0;
     /* and finally, set up the output signal */
-    fsig_.N          = N;
-    fsig_.overlap    = overlap;
-    fsig_.winsize    = M;
-    fsig_.wintype    = windowType;
-    fsig_.framecount = 1;
-    fsig_.format     = SPECTRAL_FORMAT::AMP_FREQ; /* only this, for now */
-    fsig_.sliding    = false;
+    fsig_out_.N          = N;
+    fsig_out_.overlap    = overlap;
+    fsig_out_.winsize    = M;
+    fsig_out_.wintype    = window_type;
+    fsig_out_.framecount = 1;
+    fsig_out_.format     = SPECTRAL_FORMAT::AMP_FREQ; /* only this, for now */
+    fsig_out_.sliding    = false;
 
     // if (!(N & (N - 1))) /* if pow of two use this */
     //  setup = csound->RealFFT2Setup(csound,N,FFT_FWD);
     // return OK;
 
-    sr_ = sampleRate;
+    sample_rate_ = sample_rate;
     fft_.Init();
 }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::InitSliding(
-    SPECTRAL_WINDOW windowType,
-    size_t          sampleRate,
+    SPECTRAL_WINDOW window_type,
+    size_t          sample_rate,
     size_t          block)
 {
     /* opcode params */
@@ -212,11 +211,11 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::InitSliding(
     //   else memset(analwinbuf.auxp, 0, NB*sizeof(CMPLX));
 
     inptr_   = 0; /* Pointer in circular buffer */
-    fsig_.NB = Ii_ = NB;
-    fsig_.wintype  = windowType;
-    fsig_.format   = SPECTRAL_FORMAT::AMP_FREQ; /* only this, for now */
-    fsig_.N = nI_ = N;
-    fsig_.sliding = true;
+    fsig_out_.NB = Ii_ = NB;
+    fsig_out_.wintype  = window_type;
+    fsig_out_.format   = SPECTRAL_FORMAT::AMP_FREQ; /* only this, for now */
+    fsig_out_.N = nI_ = N;
+    fsig_out_.sliding = true;
 
     // NOTE -- avoiding allocation but still filling trig buffers
     /* Need space for NB sines, cosines and a scatch phase area */
@@ -250,20 +249,20 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::InitSliding(
     }
     // return OK;
 
-    sr_ = sampleRate;
+    sample_rate_ = sample_rate;
     // The fft isn't used in sliding mode
     // fft_.Init();
 }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-SpectralBuffer<FFT_SIZE + 2> &
+SpectralBuffer<FFT_SIZE>&
 SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process()
 {
     while(state_ != STATE::PROCESSING) {}
     GenerateFrame();
     state_ = STATE::IDLE;
-    fsig_.framecount++;
-    return fsig_;
+    fsig_out_.framecount++;
+    return fsig_out_;
 
 
     // // float *ain;
@@ -301,21 +300,21 @@ SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process()
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample(float sample)
 {
-    if(inptr_ == fsig_.overlap)
+    if(inptr_ == fsig_out_.overlap)
     {
         inptr_ = 0;
         switch(state_)
         {
             case STATE::INIT:
-                inputSegment_ = overlapbuf_ + halfOverlap_;
+                input_segment_ = overlapbuf_ + half_overlap_;
                 state_        = STATE::PROCESSING;
                 break;
             case STATE::IDLE:
-                inputSegment_ = (inputSegment_ == overlapbuf_)
-                                    ? overlapbuf_ + halfOverlap_
+                input_segment_ = (input_segment_ == overlapbuf_)
+                                    ? overlapbuf_ + half_overlap_
                                     : overlapbuf_;
-                processSegment_ = (processSegment_ == overlapbuf_)
-                                      ? overlapbuf_ + halfOverlap_
+                process_segment_ = (process_segment_ == overlapbuf_)
+                                      ? overlapbuf_ + half_overlap_
                                       : overlapbuf_;
                 state_ = STATE::PROCESSING;
                 break;
@@ -324,21 +323,21 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample(float sample)
         }
     }
 
-    inputSegment_[inptr_++] = sample;
+    input_segment_[inptr_++] = sample;
 }
 
-template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(float sample)
-{
-    if(inptr_ == fsig_.overlap)
-    {
-        GenerateFrame();
-        fsig_.framecount++;
-        inptr_ = 0;
-    }
-    //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
-    overlapbuf_[inptr_++] = sample;
-}
+// template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+// void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(float sample)
+// {
+//     if(inptr_ == fsig_out_.overlap)
+//     {
+//         GenerateFrame();
+//         fsig_out_.framecount++;
+//         inptr_ = 0;
+//     }
+//     //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
+//     overlapbuf_[inptr_++] = sample;
+// }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
@@ -347,7 +346,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
 {
     // float *ain;
     int      NB   = Ii_, loc;
-    int      N    = fsig_.N;
+    int      N    = fsig_out_.N;
     float *  data = input_;
     Complex *fw   = (Complex *)
         analwinbuf_; // casting this regular float buffer to complex values is annoying
@@ -381,7 +380,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
         data[loc] = *in++;
         /* get the frame for this sample */
 
-        ff = (Complex *)(fsig_.frame) + i * NB;
+        ff = (Complex *)(fsig_out_.frame) + i * NB;
         /* fw is the current frame at this sample */
         for(j = 0; j < NB; j++)
         {
@@ -408,7 +407,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
                                       0.02838 [F_{t-2}+F_{t+2}] */
         /* BHarris_min:Fw_t = 0.42323 F_t - 0.2486703 [ F_{t-1}+F_{t+1}] +
                                       0.0391396 [F_{t-2}+F_{t+2}] */
-        switch(fsig_.wintype)
+        switch(fsig_out_.wintype)
         {
             case SPECTRAL_WINDOW::HAMMING:
                 for(j = 0; j < NB; j++)
@@ -592,7 +591,7 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
             ff[j].a  = thismag;
 
             // ff[j].b = csound->esr * (j + angleDif)/N;
-            ff[j].b = sr_ * (j + angleDif) / N;
+            ff[j].b = sample_rate_ * (j + angleDif) / N;
         }
         /*       if (i==9) { */
         /*         printf("Frame as Amp/Freq %d\n", i); */
@@ -609,9 +608,9 @@ template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
 {
     int    got, tocp, i, j, k, ii;
-    int    N          = fsig_.N;
+    int    N          = fsig_out_.N;
     int    N2         = N / 2;
-    int    analWinLen = fsig_.winsize / 2;
+    int    analWinLen = fsig_out_.winsize / 2;
     int    synWinLen  = analWinLen;
     float *ofp; /* RWD MUST be 32bit */
     float *fp;
@@ -623,9 +622,9 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
     float  angleDif, real, imag, phase;
     float  rratio;
 
-    got = fsig_.overlap; /*always assume */
+    got = fsig_out_.overlap; /*always assume */
     // fp   = overlapbuf_;
-    fp   = processSegment_;
+    fp   = process_segment_;
     tocp = (got <= tempInput + buflen_ - nextIn_
                 ? got
                 : tempInput + buflen_ - nextIn_);
@@ -695,11 +694,12 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
     {
         fft_.Direct(anal, analOut);
     }
-    // // maybe it needs smaller levels?
-    // for (int n = 0; n < N; n++)
-    // {
-    //     anal[n] /= sr_;
-    // }
+    // maybe it needs smaller levels?
+    float fac = 1.0 / (float) sample_rate_;
+    for (int n = 0; n < N; n++)
+    {
+        anal[n] *= fac;
+    }
     Interlace(analOut, anal, N);
 
     //////////////////////////////////////////////////////////
@@ -740,14 +740,14 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
     /* } */
     /* else must be PVOC_COMPLEX */
     fp  = anal;
-    ofp = fsig_.frame; /* RWD MUST be 32bit */
+    ofp = fsig_out_.frame; /* RWD MUST be 32bit */
     for(i = 0; i < N + 2; i++)
         /* *ofp++ = (float)(*fp++); */
         ofp[i] = (float)fp[i];
 
-    nI_ += fsig_.overlap; /* increment time */
-    if(nI_ > (synWinLen + fsig_.overlap))
-        Ii_ = /*I*/ fsig_.overlap;
+    nI_ += fsig_out_.overlap; /* increment time */
+    if(nI_ > (synWinLen + fsig_out_.overlap))
+        Ii_ = /*I*/ fsig_out_.overlap;
     else if(nI_ > synWinLen)
         Ii_ = nI_ - synWinLen;
     else
@@ -765,15 +765,15 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Interlace(
-    float *   fftSeparated,
-    float *   targetBuffer,
+    float *   fft_separated,
+    float *   target_buffer,
     const int length)
 {
     // unfortunately, interleaving in place is not trivial, so another buffer will have to do
     int halflen = length / 2;
     for(int i = 0; i < halflen; i++)
     {
-        targetBuffer[i * 2]     = fftSeparated[i];
-        targetBuffer[i * 2 + 1] = fftSeparated[i + halflen];
+        target_buffer[i * 2]     = fft_separated[i];
+        target_buffer[i * 2 + 1] = fft_separated[i + halflen];
     }
 }

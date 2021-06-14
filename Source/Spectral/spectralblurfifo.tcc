@@ -3,25 +3,24 @@
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
-    SpectralBuffer<FFT_SIZE + 2>& fsigIn,
+    SpectralBuffer<FFT_SIZE>& fsig_in,
     float                         delay,
-    float*                        delayBuffer,
-    size_t                        delaySize,
-    int                           sampleRate,
-    int                           block)
+    float*                        delay_buffer,
+    size_t                        delay_size,
+    int                           sample_rate)
 {
     status_   = STATUS::OK;
-    sr_       = sampleRate;
+    sample_rate_       = sample_rate;
     kdel_     = delay;
-    delframes = delayBuffer;
+    delframes = delay_buffer;
 
-    float* delayPtr;
-    int    N    = fsigIn.N, i, j;
-    int    olap = fsigIn.overlap;
+    float* delay_ptr;
+    int    N    = fsig_in.N, i, j;
+    int    olap = fsig_in.overlap;
     int    delayframes, framesize = N + 2;
 
     // Calculating the max delay time from the given buffer
-    maxdel = (float)delaySize / ((N + 2) * ((float)sampleRate / olap));
+    maxdel = (float)delay_size / ((N + 2) * ((float)sample_rate / olap));
 
     if(maxdel < delay)
     {
@@ -29,24 +28,24 @@ void SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
         return;
     }
 
-    //   if (fsigIn == fsigOut_)
+    //   if (fsigIn == fsig_out_)
     //     csound->Warning(csound, Str("Unsafe to have same fsig as in and out"));
-    if(&fsigIn == &fsigOut_)
+    if(&fsig_in == &fsig_out_)
     {
         status_ = STATUS::E_FSIG_EQUAL;
         return;
     }
 
-    if(fsigIn.sliding)
+    if(fsig_in.sliding)
     {
         status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
         return;
         // csound->InitError(csound, Str("pvsblur does not work sliding yet"));
         // delayframes = (int) (FL(0.5) + *maxdel * CS_ESR);
-        // if (fsigOut_.frame.auxp == NULL ||
-        //     fsigOut_.frame.size < sizeof(MYFLT) * CS_KSMPS * (N + 2))
+        // if (fsig_out_.frame.auxp == NULL ||
+        //     fsig_out_.frame.size < sizeof(MYFLT) * CS_KSMPS * (N + 2))
         //   csound->AuxAlloc(csound, (N + 2) * sizeof(MYFLT) * CS_KSMPS,
-        //                    &fsigOut_.frame);
+        //                    &fsig_out_.frame);
 
         // if (delframes.auxp == NULL ||
         //     delframes.size < (N + 2) * sizeof(MYFLT) * CS_KSMPS * delayframes)
@@ -56,56 +55,56 @@ void SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     }
     else
     {
-        frpsec      = (float)sr_ / olap;
+        frpsec      = (float)sample_rate_ / olap;
         delayframes = (int)(maxdel * frpsec);
 
         //   NOTE -- No need for allocation with this scheme
-        //   if (fsigOut_.frame.auxp == NULL ||
-        //       fsigOut_.frame.size < sizeof(float) * (N + 2))
-        //     csound->AuxAlloc(csound, (N + 2) * sizeof(float), &fsigOut_.frame);
+        //   if (fsig_out_.frame.auxp == NULL ||
+        //       fsig_out_.frame.size < sizeof(float) * (N + 2))
+        //     csound->AuxAlloc(csound, (N + 2) * sizeof(float), &fsig_out_.frame);
 
         //   if (delframes.auxp == NULL ||
         //       delframes.size < (N + 2) * sizeof(float) * CS_KSMPS * delayframes)
         //     csound->AuxAlloc(csound, (N + 2) * sizeof(float) * delayframes,
         //                      &delframes);
     }
-    delayPtr = delframes;
+    delay_ptr = delframes;
 
     for(j = 0; j < framesize * delayframes; j += framesize)
         for(i = 0; i < N + 2; i += 2)
         {
-            delayPtr[i + j]     = 0.0f;
-            delayPtr[i + j + 1] = i * (float)sr_ / N;
+            delay_ptr[i + j]     = 0.0f;
+            delay_ptr[i + j + 1] = i * (float)sample_rate_ / N;
         }
 
-    fsigOut_.N          = N;
-    fsigOut_.overlap    = olap;
-    fsigOut_.winsize    = fsigIn.winsize;
-    fsigOut_.wintype    = fsigIn.wintype;
-    fsigOut_.format     = fsigIn.format;
-    fsigOut_.framecount = 1;
+    fsig_out_.N          = N;
+    fsig_out_.overlap    = olap;
+    fsig_out_.winsize    = fsig_in.winsize;
+    fsig_out_.wintype    = fsig_in.wintype;
+    fsig_out_.format     = fsig_in.format;
+    fsig_out_.framecount = 1;
     lastframe           = 0;
     count               = 0;
-    fsigOut_.sliding    = fsigIn.sliding;
-    fsigOut_.NB         = fsigIn.NB;
+    fsig_out_.sliding    = fsig_in.sliding;
+    fsig_out_.NB         = fsig_in.NB;
 }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-SpectralBuffer<FFT_SIZE + 2>&
+SpectralBuffer<FFT_SIZE>&
 SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
-    SpectralBuffer<FFT_SIZE + 2>& fsigIn)
+    SpectralBuffer<FFT_SIZE>& fsig_in)
 {
-    int    j, i, N = fsigOut_.N, first, framesize = N + 2;
+    int    j, i, N = fsig_out_.N, first, framesize = N + 2;
     int    countr = count;
     float  amp = 0.0, freq = 0.0;
     int    delayframes = (int)(kdel_ * frpsec);
     int    kdel        = delayframes * framesize;
     int    mdel        = (int)(maxdel * frpsec) * framesize;
-    float* fin         = fsigIn.frame;
-    float* fout        = fsigOut_.frame;
+    float* fin         = fsig_in.frame;
+    float* fout        = fsig_out_.frame;
     float* delay       = delframes;
 
-    // if (UNLIKELY(fsigOut_ == NULL || delay == NULL)) goto err1;
+    // if (UNLIKELY(fsig_out_ == NULL || delay == NULL)) goto err1;
 
     // NOTE -- sliding doesn't work yet
     // if (fsigIn.sliding) {
@@ -114,12 +113,12 @@ SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
     //     int NB = fsigIn.NB;
     //     kdel = kdel >= 0 ? (kdel < mdel ? kdel : mdel - framesize) : 0;
     //     for (n=0; n<offset; n++) {
-    //     Complex   *fsigOut_ = (Complex *) fsigOut_.frame +NB*n;
-    //     for (i = 0; i < NB; i++) fsigOut_[i].re = fsigOut_[i].im = FL(0.0);
+    //     Complex   *fsig_out_ = (Complex *) fsig_out_.frame +NB*n;
+    //     for (i = 0; i < NB; i++) fsig_out_[i].re = fsig_out_[i].im = FL(0.0);
     //     }
     //     for (n=offset; n<nsmps; n++) {
     //     Complex   *fsigIn = (Complex *) fsigIn.frame.auxp +NB*n;
-    //     Complex   *fsigOut_ = (Complex *) fsigOut_.frame.auxp +NB*n;
+    //     Complex   *fsig_out_ = (Complex *) fsig_out_.frame.auxp +NB*n;
     //     Complex   *delay = (Complex *) delframes.auxp +NB*n;
 
     //     for (i = 0; i < NB; i++) {
@@ -133,12 +132,12 @@ SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
     //             freq += delay[j + i].im;
     //         }
 
-    //         fsigOut_[i].re = (MYFLT) (amp / delayframes);
-    //         fsigOut_[i].im = (MYFLT) (freq / delayframes);
+    //         fsig_out_[i].re = (MYFLT) (amp / delayframes);
+    //         fsig_out_[i].im = (MYFLT) (freq / delayframes);
     //         amp = freq = FL(0.0);
     //         }
     //         else {
-    //         fsigOut_[i] = fsigIn[i];
+    //         fsig_out_[i] = fsigIn[i];
     //         }
     //     }
     //     }
@@ -146,7 +145,7 @@ SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
     //     count = countr < mdel ? countr : 0;
     //     return OK;
     // }
-    if(lastframe < fsigIn.framecount)
+    if(lastframe < fsig_in.framecount)
     {
         kdel = kdel >= 0 ? (kdel < mdel ? kdel : mdel - framesize) : 0;
 
@@ -177,7 +176,7 @@ SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
             }
         }
 
-        fsigOut_.framecount = lastframe = fsigIn.framecount;
+        fsig_out_.framecount = lastframe = fsig_in.framecount;
         countr += (N + 2);
         count = countr < mdel ? countr : 0;
     }
@@ -186,5 +185,5 @@ SpectralBlurFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
     // err1:
     // return csound->PerfError(csound, &(h),
     //                         Str("pvsblur: not initialised"));
-    return fsigOut_;
+    return fsig_out_;
 }

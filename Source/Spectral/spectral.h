@@ -50,7 +50,7 @@ enum SPECTRAL_FORMAT
     TRACKS,
 };
 
-template <size_t FRAME_SIZE>
+template <size_t FFT_SIZE>
 struct SpectralBuffer
 {
     int          N;
@@ -61,7 +61,7 @@ struct SpectralBuffer
     int          wintype;
     int          format;
     unsigned int framecount;
-    float        frame[FRAME_SIZE];
+    float        frame[FFT_SIZE + 2];
 };
 
 // This causes errors somehow

@@ -23,13 +23,13 @@ namespace daicsp
  *  Ported from Csound pvsanal.
  * 
  *  \param FFT_SIZE - This determines the size of the FFT. It must be a power of greater than 32.
- *  \param overlap - This determines the overlap between frequency frames. It should be at least fftsize / 4, but cannot be greater than fftsize / 2.
- *  \param windowSize - This determines the size of the analysis window. It must be greater than or equal to fftsize.
+ *  \param OVERLAP - This determines the overlap between frequency frames. It should be at least fftsize / 4, but cannot be greater than fftsize / 2.
+ *  \param WINDOW_SIZE - This determines the size of the analysis window. It must be greater than or equal to fftsize.
  */
 
 template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = 512,
-          size_t WINDOW_SIZE = 2048>
+          size_t OVERLAP     = FFT_SIZE / 4,
+          size_t WINDOW_SIZE = FFT_SIZE>
 class SpectralAnalyzerFifo
 {
   public:
@@ -73,13 +73,11 @@ class SpectralAnalyzerFifo
     };
 
     /** Initializes the SpectralAnalyzerFifo module.
-         *  \param windowType - The windowing function. Currently, only Hamming and Hann are supported.
-         *  \param sampleRate - The program sample rate.
-         *  \param block - The program audio block size
+         *  \param window_type - The windowing function. Currently, only Hamming and Hann are supported.
+         *  \param sample_rate - The program sample rate.
          */
-    void Init(SPECTRAL_WINDOW windowType,
-              size_t          sampleRate,
-              size_t          block); //pvsanalset
+    void Init(SPECTRAL_WINDOW window_type,
+              size_t          sample_rate); //pvsanalset
 
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
@@ -90,9 +88,9 @@ class SpectralAnalyzerFifo
      *  blocks until the FIFO is filled.
      *  \returns - A reference to the internal `SpectralBuffer` containing the frequency-domain data.
      */
-    SpectralBuffer<FFT_SIZE + 2>& Process(); // pvsanal
+    SpectralBuffer<FFT_SIZE>& Process(); // pvsanal
 
-    SpectralBuffer<FFT_SIZE + 2>& GetFsig() { return fsig_; }
+    SpectralBuffer<FFT_SIZE>& GetFsig() { return fsig_out_; }
 
     /** Retrieves the current status. Useful for error checking.
          */
@@ -112,8 +110,8 @@ class SpectralAnalyzerFifo
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.
          *  This is not currently implemented, but can be useful for small overlap sizes.
          */
-    void InitSliding(SPECTRAL_WINDOW windowType,
-                     size_t          sampleRate,
+    void InitSliding(SPECTRAL_WINDOW window_type,
+                     size_t          sample_rate,
                      size_t          block); // pvssanalset
 
     void ProcessSliding(const float* in, size_t size); // pvssanal
@@ -128,7 +126,8 @@ class SpectralAnalyzerFifo
          *  shy_fft, on the other hand, puts real in the first
          *  half and imaginary in the other.
          */
-    void Interlace(float* fftSeparated, float* targetBuffer, const int length);
+    void
+    Interlace(float* fft_separated, float* target_buffer, const int length);
 
     int    buflen_;
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
@@ -138,12 +137,11 @@ class SpectralAnalyzerFifo
 
     float input_[FFT_SIZE * 4];
 
-    float overlapbuf_
-        [OVERLAP
-         * 2]; // This is how we manage the input FIFO, so it's twice the size
-    size_t halfOverlap_;
-    float* inputSegment_;
-    float* processSegment_;
+    // This is how we manage the input FIFO, so it's twice the size
+    float  overlapbuf_[OVERLAP * 2];
+    size_t half_overlap_;
+    float* input_segment_;
+    float* process_segment_;
 
     float analbuf_[FFT_SIZE + 2];
     float analbufOut_[FFT_SIZE + 2];
@@ -162,13 +160,13 @@ class SpectralAnalyzerFifo
 
     ShyFFT<float, FFT_SIZE> fft_;
 
-    SpectralBuffer<FFT_SIZE + 2> fsig_;
-    float                        sr_;
-    STATUS                       status_;
-    STATE                        state_;
+    SpectralBuffer<FFT_SIZE> fsig_out_;
+    float                    sample_rate_;
+    STATUS                   status_;
+    STATE                    state_;
 };
 
-#include "spectralanalyzerfifoimpl.h"
+#include "spectralanalyzerfifo.tcc"
 
 } // namespace daicsp
 

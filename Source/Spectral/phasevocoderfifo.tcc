@@ -3,13 +3,12 @@
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
-    SpectralBuffer<FFT_SIZE + 2> &fsig,
-    size_t                        sampleRate,
-    size_t                        block)
+    SpectralBuffer<FFT_SIZE>& fsig_in,
+    size_t                        sample_rate)
 {
     status_ = STATUS::OK;
     state_  = STATE::INIT;
-    sr_     = sampleRate;
+    sample_rate_     = sample_rate;
 
     float *analwinhalf;
     float *synwinhalf;
@@ -28,11 +27,11 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     int N       = FFT_SIZE;
     int overlap = OVERLAP;
     int M       = WINDOW_SIZE;
-    int wintype = fsig.wintype;
+    int wintype = fsig_in.wintype;
 
-    halfOverlap_    = overlap;
-    outputSegment_  = overlapbuf_;
-    processSegment_ = overlapbuf_;
+    half_overlap_    = overlap;
+    output_segment_  = overlapbuf_;
+    process_segment_ = overlapbuf_;
 
     // NOTE -- these would be useful for in-depth error checking
     // p->fftsize = N;
@@ -42,7 +41,7 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     // p->format = fsig.format;
 
     // NOTE -- sliding not yet implemented
-    if(fsig.sliding)
+    if(fsig_in.sliding)
     {
         /* get params from input_ fsig */
         /* we TRUST they are legal */
@@ -66,7 +65,7 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     buflen_     = M * 4;
     IO          = (double)overlap; /* always, no time-scaling possible */
 
-    float arate = sr_ / (float)overlap;
+    float arate = sample_rate_ / (float)overlap;
     // float fund = sr_ / (float) N;
 
     // nBins = N/2 + 1;
@@ -170,7 +169,7 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
     RoverTwoPi_ = arate / TWOPI_F;
     TwoPioverR_ = TWOPI_F / arate;
     // Fexact_ =  csound->esr / (float)N;
-    Fexact_ = sr_ / (float)N;
+    Fexact_ = sample_rate_ / (float)N;
     nO_     = -(halfwinsize / overlap) * overlap; /* input_ time (in samples) */
     Ii_     = 0; /* number of new outputs to write */
     IOi_    = 0;
@@ -187,21 +186,21 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Init(
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample()
 {
-    if(outptr_ == halfOverlap_)
+    if(outptr_ == half_overlap_)
     {
         outptr_ = 0;
         switch(state_)
         {
             case STATE::INIT:
-                outputSegment_ = overlapbuf_ + halfOverlap_;
+                output_segment_ = overlapbuf_ + half_overlap_;
                 state_         = STATE::PROCESSING;
                 break;
             case STATE::IDLE:
-                outputSegment_ = (outputSegment_ == overlapbuf_)
-                                     ? overlapbuf_ + halfOverlap_
+                output_segment_ = (output_segment_ == overlapbuf_)
+                                     ? overlapbuf_ + half_overlap_
                                      : overlapbuf_;
-                processSegment_ = (processSegment_ == overlapbuf_)
-                                      ? overlapbuf_ + halfOverlap_
+                process_segment_ = (process_segment_ == overlapbuf_)
+                                      ? overlapbuf_ + half_overlap_
                                       : overlapbuf_;
                 state_ = STATE::PROCESSING;
                 break;
@@ -210,12 +209,12 @@ float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Sample()
         }
     }
 
-    return outputSegment_[outptr_++];
+    return output_segment_[outptr_++];
 }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
-    SpectralBuffer<FFT_SIZE + 2> &fsig)
+    SpectralBuffer<FFT_SIZE> &fsig_in)
 {
     // // int offset = h.insdshead->ksmps_offset;
     // // int early  = h.insdshead->ksmps_no_end;
@@ -248,25 +247,25 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Process(
     // return outputBuffer_;
 
     while(state_ != STATE::PROCESSING) {}
-    GenerateFrame(fsig);
+    GenerateFrame(fsig_in);
     state_ = STATE::IDLE;
 }
 
-template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(
-    SpectralBuffer<FFT_SIZE + 2> &fsig)
-{
-    if(outptr_ == fsig.overlap)
-    {
-        GenerateFrame(fsig);
-        outptr_ = 0;
-    }
-    return outputSegment_[outptr_++];
-}
+// template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
+// float PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Tick(
+//     const SpectralBuffer<FFT_SIZE> &fsig_in)
+// {
+//     if(outptr_ == fsig_in.overlap)
+//     {
+//         GenerateFrame(fsig_in);
+//         outptr_ = 0;
+//     }
+//     return outputSegment_[outptr_++];
+// }
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
-    SpectralBuffer<FFT_SIZE + 2> &fsig,
+    SpectralBuffer<FFT_SIZE> &fsig_in,
     size_t                        size)
 {
     // int      i, k;
@@ -308,18 +307,18 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::ProcessSliding(
 
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
-    SpectralBuffer<FFT_SIZE + 2> &fsig)
+    SpectralBuffer<FFT_SIZE> &fsig_in)
 {
     int    i, j, k, ii, NO, NO2;
     float *anal; /* RWD MUST be 32bit */
     float *syn;
     float *tempOldOutPhase = oldOutPhase_;
-    int    N               = fsig.N;
+    int    N               = fsig_in.N;
     float *obufptr, *outbuf, *synWindow;
     float  mag, phase, angledif, the_phase;
-    int    synWinLen = fsig.winsize / 2;
-    int    overlap   = fsig.overlap;
-    /*int32 format = fsig.format; */
+    int    synWinLen = fsig_in.winsize / 2;
+    int    overlap   = fsig_in.overlap;
+    /*int32 format = fsig_in.format; */
 
     /* fsigs MUST be corect format, as we offer no mechanism for
        assignment to a different one*/
@@ -327,9 +326,9 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
     NO   = N; /* always the same */
     NO2  = NO / 2;
     syn  = synbuf_;
-    anal = fsig.frame; /* RWD MUST be 32bit */
+    anal = fsig_in.frame; /* RWD MUST be 32bit */
     // output = (float *) (output.auxp);
-    outbuf    = processSegment_;
+    outbuf    = process_segment_;
     synWindow = synwinbuf_ + synWinLen;
 
     /* reconversion: The magnitude and angle-difference-per-second in syn
@@ -487,19 +486,19 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
 template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
 void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Deinterlace(
     float *   interlaced,
-    float *   workingBuffer,
+    float *   working_buffer,
     const int length)
 {
     int halflen = length / 2;
 
     for(int i = 0; i < halflen; i++)
     {
-        workingBuffer[i]           = interlaced[i * 2];
-        workingBuffer[i + halflen] = interlaced[i * 2 + 1];
+        working_buffer[i]           = interlaced[i * 2];
+        working_buffer[i + halflen] = interlaced[i * 2 + 1];
     }
 
     for(int i = 0; i < length; i++)
     {
-        interlaced[i] = workingBuffer[i];
+        interlaced[i] = working_buffer[i];
     }
 }

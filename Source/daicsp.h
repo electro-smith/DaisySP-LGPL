@@ -32,7 +32,7 @@
 #include "Filters/atone.h"
 #include "Filters/biquad.h"
 #include "Filters/comb.h"
-#include "Filters/mode.h"
+// #include "Filters/mode.h"
 #include "Filters/moogladder.h"
 #include "Filters/nlfilt.h"
 #include "Filters/tone.h"
@@ -48,6 +48,7 @@
 #include "Spectral/phasevocoderfifo.h"
 #include "Spectral/spectralblur.h"
 #include "Spectral/spectralblurfifo.h"
+#include "Spectral/spectralfreezefifo.h"
 
 /** Utility Modules */
 #include "Utility/dsp.h"
