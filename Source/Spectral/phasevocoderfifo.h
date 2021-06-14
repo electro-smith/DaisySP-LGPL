@@ -18,8 +18,8 @@ namespace daicsp
  *  Ported from Csound pvsynth.
  */
 template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = 512,
-          size_t WINDOW_SIZE = 2048>
+          size_t OVERLAP     = FFT_SIZE / 4,
+          size_t WINDOW_SIZE = FFT_SIZE>
 class PhaseVocoderFifo
 {
   public:
@@ -89,14 +89,6 @@ class PhaseVocoderFifo
     float Tick(SpectralBuffer<FFT_SIZE>& fsig_in); // analyze_tick
 
     void GenerateFrame(SpectralBuffer<FFT_SIZE>& fsig_in); // process_frame
-
-    /** Interlaces real and imaginary values into real and imaginary blocks for use with shy_fft.
-         *  This is made necessary because Csound's fft function
-         *  Interleaves real and imaginary values by default.
-         *  shy_fft, on the other hand, puts real in the first
-         *  half and imaginary in the other.
-         */
-    void Deinterlace(float* interlaced, float* target_buffer, const int length);
 
     int    buflen_;
     float  RoverTwoPi_, TwoPioverR_, Fexact_;

@@ -186,3 +186,34 @@ double daicsp::Besseli(double x)
     }
     return ans;
 }
+
+void daicsp::Interlace(float*    fft_separated,
+                       float*    target_buffer,
+                       const int length)
+{
+    // unfortunately, interleaving in place is not trivial, so another buffer will have to do
+    int halflen = length / 2;
+    for(int i = 0; i < halflen; i++)
+    {
+        target_buffer[i * 2]     = fft_separated[i];
+        target_buffer[i * 2 + 1] = fft_separated[i + halflen];
+    }
+}
+
+void daicsp::Deinterlace(float*    fft_interlaced,
+                         float*    working_buffer,
+                         const int length)
+{
+    int halflen = length / 2;
+
+    for(int i = 0; i < halflen; i++)
+    {
+        working_buffer[i]           = fft_interlaced[i * 2];
+        working_buffer[i + halflen] = fft_interlaced[i * 2 + 1];
+    }
+
+    for(int i = 0; i < length; i++)
+    {
+        fft_interlaced[i] = working_buffer[i];
+    }
+}

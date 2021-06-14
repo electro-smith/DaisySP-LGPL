@@ -694,12 +694,6 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
     {
         fft_.Direct(anal, analOut);
     }
-    // maybe it needs smaller levels?
-    float fac = 1.0 / (float) sample_rate_;
-    for (int n = 0; n < N; n++)
-    {
-        anal[n] *= fac;
-    }
     Interlace(analOut, anal, N);
 
     //////////////////////////////////////////////////////////
@@ -761,19 +755,4 @@ void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame()
     }
 
     IOi_ = Ii_;
-}
-
-template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-void SpectralAnalyzerFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Interlace(
-    float *   fft_separated,
-    float *   target_buffer,
-    const int length)
-{
-    // unfortunately, interleaving in place is not trivial, so another buffer will have to do
-    int halflen = length / 2;
-    for(int i = 0; i < halflen; i++)
-    {
-        target_buffer[i * 2]     = fft_separated[i];
-        target_buffer[i * 2 + 1] = fft_separated[i + halflen];
-    }
 }

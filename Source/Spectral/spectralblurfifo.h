@@ -17,8 +17,8 @@ namespace daicsp
  */
 
 template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = 512,
-          size_t WINDOW_SIZE = 2048>
+          size_t OVERLAP     = FFT_SIZE / 4,
+          size_t WINDOW_SIZE = FFT_SIZE>
 class SpectralBlurFifo
 {
   public:

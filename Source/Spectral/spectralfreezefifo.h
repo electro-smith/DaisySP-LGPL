@@ -14,8 +14,8 @@ namespace daicsp
  *  Ported from Csound pvsfreeze
  */
 template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = 512,
-          size_t WINDOW_SIZE = 2048>
+          size_t OVERLAP     = FFT_SIZE / 4,
+          size_t WINDOW_SIZE = FFT_SIZE>
 class SpectralFreezeFifo
 {
   public:
@@ -55,6 +55,8 @@ class SpectralFreezeFifo
     void SetAmplitude(float amp) { kfra_ = amp; }
 
     void SetFrequency(float freq) { kfrf_ = freq; }
+
+    SpectralBuffer<FFT_SIZE>& GetFsig() { return fsig_out_; }
 
     STATUS GetStatus() { return status_; }
 

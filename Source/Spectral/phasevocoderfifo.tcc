@@ -399,7 +399,7 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
     //////////////////////////////////////////////////////////
 
     Deinterlace(syn, synbufOut_, NO);
-    if(NO != FFT::MAX_SIZE)
+    if(NO != FFT_SIZE)
     {
         int num_passes = GetPasses(NO);
         fft_.Inverse(syn, synbufOut_, num_passes);
@@ -481,24 +481,4 @@ void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::GenerateFrame(
                 output_[i] = 0.0f;
     }
     IOi_ = Ii_;
-}
-
-template <size_t FFT_SIZE, size_t OVERLAP, size_t WINDOW_SIZE>
-void PhaseVocoderFifo<FFT_SIZE, OVERLAP, WINDOW_SIZE>::Deinterlace(
-    float *   interlaced,
-    float *   working_buffer,
-    const int length)
-{
-    int halflen = length / 2;
-
-    for(int i = 0; i < halflen; i++)
-    {
-        working_buffer[i]           = interlaced[i * 2];
-        working_buffer[i + halflen] = interlaced[i * 2 + 1];
-    }
-
-    for(int i = 0; i < length; i++)
-    {
-        interlaced[i] = working_buffer[i];
-    }
 }

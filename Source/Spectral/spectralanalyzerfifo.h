@@ -120,15 +120,6 @@ class SpectralAnalyzerFifo
 
     void GenerateFrame(); // generate_frame
 
-    /** Interlaces real and imaginary values from shy_fft.
-         *  This is made necessary because Csound's fft function
-         *  interleaves real and imaginary values by default.
-         *  shy_fft, on the other hand, puts real in the first
-         *  half and imaginary in the other.
-         */
-    void
-    Interlace(float* fft_separated, float* target_buffer, const int length);
-
     int    buflen_;
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
     float* nextIn_;

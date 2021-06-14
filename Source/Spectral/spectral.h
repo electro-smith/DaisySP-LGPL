@@ -95,6 +95,18 @@ void Vonhann(float* windowBuffer, int windowLength, int even);
 
 double Besseli(double x);
 
+/** Interlaces real and imaginary values from shy_fft.
+         *  This is made necessary because Csound's fft function
+         *  interleaves real and imaginary values by default.
+         *  shy_fft, on the other hand, puts real in the first
+         *  half and imaginary in the other.
+         */
+void Interlace(float* fft_separated, float* target_buffer, const int length);
+
+/** Deinterlaces real and imaginary values into blocks for processing by shy_fft.
+         */
+void Deinterlace(float* interlaced, float* target_buffer, const int length);
+
 
 } // namespace daicsp
 
