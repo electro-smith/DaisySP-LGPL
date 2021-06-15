@@ -725,7 +725,7 @@ void SpectralAnalyzer::GenerateFrame()
     // Custom FFT section
     //////////////////////////////////////////////////////////
 
-    if(N != FFT::MAX_SIZE)
+    if(N != kFFTMaxSize)
     {
         int num_passes = GetPasses(N);
         fft_.Direct(anal, analOut, num_passes);

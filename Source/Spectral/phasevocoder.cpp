@@ -399,7 +399,7 @@ void PhaseVocoder::GenerateFrame(SpectralBuffer &fsig_in)
     //////////////////////////////////////////////////////////
 
     Deinterleave(syn, synbufOut_, NO);
-    if(NO != FFT::MAX_SIZE)
+    if(NO != kFFTMaxSize)
     {
         int num_passes = GetPasses(NO);
         fft_.Inverse(syn, synbufOut_, num_passes);

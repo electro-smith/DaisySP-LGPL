@@ -217,7 +217,7 @@ SpectralBuffer& SpectralScale::Process(SpectralBuffer& fsig_in)
                         //   else
                         //     csound->RealFFTnp2(csound, ceps, tmp);
 
-                        if(N != FFT::MAX_SIZE)
+                        if(N != kFFTMaxSize)
                         {
                             int num_passes = GetPasses(tmp);
                             fft_.Direct(ceps, ceps_out_, num_passes);
@@ -238,7 +238,7 @@ SpectralBuffer& SpectralScale::Process(SpectralBuffer& fsig_in)
                         //     csound->InverseRealFFTnp2(csound, ceps, tmp);
 
                         Deinterleave(ceps, ceps_out_, N);
-                        if(N != FFT::MAX_SIZE)
+                        if(N != kFFTMaxSize)
                         {
                             int num_passes = GetPasses(N);
                             fft_.Inverse(ceps, ceps_out_, num_passes);
