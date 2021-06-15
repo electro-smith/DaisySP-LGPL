@@ -67,7 +67,12 @@ CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(UTILITY_MOD_DIR)/$(UTILITY_MODU
 # debug build?
 #DEBUG = 0
 # optimization
-OPT = -O3
+# OPT = -O0
+# OPT = -O3
+OPT = 
+
+# major hack to get debugging working with daicsp
+# OPT = -g
 
 #######################################
 # paths

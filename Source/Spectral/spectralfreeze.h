@@ -73,7 +73,7 @@ class SpectralFreeze
     SpectralBuffer fsig_out_;
 
     float    kfra_, kfrf_;
-    float    freez_[FFT::MAX_FLOATS];
+    float    freez_[kFFTMaxFloats];
     uint32_t lastframe_;
 };
 

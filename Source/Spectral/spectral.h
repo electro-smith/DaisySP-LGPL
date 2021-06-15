@@ -14,25 +14,21 @@ namespace daicsp
 #define __FFT_SIZE__ 4096
 #endif
 
-enum FFT
-{
-    MAX_SIZE    = __FFT_SIZE__,
-    MAX_WINDOW  = __FFT_SIZE__ + 1,
-    MAX_FLOATS  = __FFT_SIZE__ + 2,
-    MAX_BINS    = __FFT_SIZE__ / 2 + 1,
-    MAX_OVERLAP = __FFT_SIZE__ / 2,
-    MAX_FRAMES  = __FFT_SIZE__ * 4,
-
-    // NOTE -- This is a temporary measure to ensure
-    // the appropriate buffers have enough space for
-    // sliding and non-sliding applications. It is
-    // derived from: numBins * audioBlock
-    // Needless to say, this is a temporary hack and
-    // needs a better solution since the audio block
-    // size may not be known at compile time.
-    // (this assumes 48)
-    MAX_SLIDE_SIZE = 4704,
-};
+static constexpr unsigned int kFFTMaxSize    = __FFT_SIZE__;
+static constexpr unsigned int kFFTMaxWindow  = __FFT_SIZE__ + 1;
+static constexpr unsigned int kFFTMaxFloats  = __FFT_SIZE__ + 2;
+static constexpr unsigned int kFFTMaxBins    = __FFT_SIZE__ / 2 + 1;
+static constexpr unsigned int kFFTMaxOverlap = __FFT_SIZE__ / 2;
+static constexpr unsigned int kFFTMaxFrames  = __FFT_SIZE__ * 4;
+// NOTE -- This is a temporary measure to ensure
+// the appropriate buffers have enough space for
+// sliding and non-sliding applications. It is
+// derived from: numBins * audioBlock
+// Needless to say, this is a temporary hack and
+// needs a better solution since the audio block
+// size may not be known at compile time.
+// (this assumes 48)
+static constexpr unsigned int kFFTMaxSlide = 4704;
 
 enum SPECTRAL_WINDOW
 {
@@ -66,7 +62,7 @@ struct SpectralBuffer
     int          wintype;
     int          format;
     unsigned int framecount;
-    float        frame[FFT::MAX_FLOATS];
+    float        frame[kFFTMaxFloats];
     bool         ready;
 };
 

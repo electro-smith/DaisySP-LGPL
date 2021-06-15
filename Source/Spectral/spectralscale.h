@@ -90,16 +90,16 @@ class SpectralScale
     int    sample_rate_;
     STATUS status_;
 
-    SpectralBuffer               fsig_out_;
-    ShyFFT<float, FFT::MAX_SIZE> fft_;
+    SpectralBuffer             fsig_out_;
+    ShyFFT<float, kFFTMaxSize> fft_;
 
     float    kscal_;
     int      keepform_;
     float    gain_;
     int      coefs_;
-    float    fenv_[FFT::MAX_FLOATS];
-    float    ceps_[FFT::MAX_FLOATS];
-    float    ceps_out_[FFT::MAX_FLOATS];
+    float    fenv_[kFFTMaxFloats];
+    float    ceps_[kFFTMaxFloats];
+    float    ceps_out_[kFFTMaxFloats];
     float*   ftmp_;
     uint32_t lastframe;
 };

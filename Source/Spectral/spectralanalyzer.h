@@ -126,18 +126,18 @@ class SpectralAnalyzer
     int    nI_, Ii_, IOi_;
     int    inptr_;
 
-    float input_[FFT::MAX_FRAMES];
+    float input_[kFFTMaxFrames];
 
     // This is how we manage the input FIFO, so it's twice the size
-    float  overlapbuf_[FFT::MAX_OVERLAP * 2];
+    float  overlapbuf_[kFFTMaxOverlap * 2];
     size_t half_overlap_;
     float* input_segment_;
     float* process_segment_;
 
-    float analbuf_[FFT::MAX_FLOATS];
-    float analbufOut_[FFT::MAX_FLOATS];
-    float analwinbuf_[FFT::MAX_WINDOW];
-    float oldInPhase_[FFT::MAX_BINS];
+    float analbuf_[kFFTMaxFloats];
+    float analbufOut_[kFFTMaxFloats];
+    float analwinbuf_[kFFTMaxWindow];
+    float oldInPhase_[kFFTMaxFloats];
 
     // If floats aren't enough quality, return to doubles
     // float trig_[FFT_SIZE];
@@ -149,7 +149,7 @@ class SpectralAnalyzer
     float* cosine_;
     float* sine_;
 
-    ShyFFT<float, FFT::MAX_SIZE> fft_;
+    ShyFFT<float, kFFTMaxSize> fft_;
 
     SpectralBuffer fsig_out_;
     float          sample_rate_;

@@ -92,19 +92,19 @@ class PhaseVocoder
     int    nO_, Ii_, IOi_;
     size_t outptr_;
 
-    float  output_[FFT::MAX_FRAMES];
-    float  overlapbuf_[FFT::MAX_OVERLAP * 2];
+    float  output_[kFFTMaxFrames];
+    float  overlapbuf_[kFFTMaxOverlap * 2];
     size_t half_overlap_;
     float* output_segment_;
     float* process_segment_;
 
-    float synbuf_[FFT::MAX_FLOATS];
-    float synbufOut_[FFT::MAX_FLOATS];
-    float analwinbuf_[FFT::MAX_WINDOW];
-    float synwinbuf_[FFT::MAX_WINDOW];
-    float oldOutPhase_[FFT::MAX_BINS];
+    float synbuf_[kFFTMaxFloats];
+    float synbufOut_[kFFTMaxFloats];
+    float analwinbuf_[kFFTMaxWindow];
+    float synwinbuf_[kFFTMaxWindow];
+    float oldOutPhase_[kFFTMaxBins];
 
-    ShyFFT<float, FFT::MAX_SIZE> fft_;
+    ShyFFT<float, kFFTMaxSize> fft_;
 
     float sample_rate_;
 
