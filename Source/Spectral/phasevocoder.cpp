@@ -185,7 +185,7 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in, size_t sample_rate)
     fft_.Init();
 }
 
-float PhaseVocoder::Sample()
+float PhaseVocoder::Process()
 {
     if(outptr_ == half_overlap_)
     {
@@ -213,7 +213,7 @@ float PhaseVocoder::Sample()
     return output_segment_[outptr_++];
 }
 
-void PhaseVocoder::Process(SpectralBuffer &fsig_in)
+void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
 {
     // // int offset = h.insdshead->ksmps_offset;
     // // int early  = h.insdshead->ksmps_no_end;

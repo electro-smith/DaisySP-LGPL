@@ -52,15 +52,15 @@ class PhaseVocoder
          */
     void Init(SpectralBuffer& fsig_in, size_t sample_rate);
 
-    /** Processes an incoming fsig.
+    /** Processes an incoming fsig in parallel to the audio callback.
          *  \param fsig_in - A `SpectralBuffer` from the source used to initialize this module.
          */
-    void Process(SpectralBuffer& fsig_in); // pvsynth
+    void ParallelProcess(SpectralBuffer& fsig_in); // pvsynth
 
     /** Retrieves a single sample from the FIFO, and
      *  queues the bulk processing when appropriate.
      */
-    float Sample();
+    float Process();
 
     /** Retrieves the current status. Useful for error checking.
          */

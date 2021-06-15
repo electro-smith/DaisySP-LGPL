@@ -263,7 +263,7 @@ void SpectralAnalyzer::InitSliding(uint32_t        fft_size,
     // fft_.Init();
 }
 
-SpectralBuffer &SpectralAnalyzer::Process()
+SpectralBuffer &SpectralAnalyzer::ParallelProcess()
 {
     if(state_ == STATE::PROCESSING)
     {
@@ -312,7 +312,7 @@ SpectralBuffer &SpectralAnalyzer::Process()
     // return fsig_;
 }
 
-void SpectralAnalyzer::Sample(float sample)
+void SpectralAnalyzer::Process(float sample)
 {
     if(inptr_ == fsig_out_.overlap)
     {

@@ -61,7 +61,7 @@ class SpectralBlur
          *  \param fsig_in - An analyzed `SpectralBuffer`.
          *  \returns - A processed `SpectralBuffer`.
          */
-    SpectralBuffer& Process(SpectralBuffer& fsig_in);
+    SpectralBuffer& ParallelProcess(SpectralBuffer& fsig_in);
 
     void SetDelay(float delay) { kdel_ = delay; }
 

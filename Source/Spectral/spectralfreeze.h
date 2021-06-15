@@ -48,7 +48,7 @@ class SpectralFreeze
          *  \param fsig_in - An analyzed `SpectralBuffer`.
          *  \returns - A processed `SpectralBuffer`.
          */
-    SpectralBuffer& Process(SpectralBuffer& fsig_in);
+    SpectralBuffer& ParallelProcess(SpectralBuffer& fsig_in);
 
     void SetAmplitude(float amp) { kfra_ = amp; }
 

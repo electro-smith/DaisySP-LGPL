@@ -69,7 +69,7 @@ class SpectralScale
              *  \param fsig_in - An analyzed `SpectralBuffer`.
              *  \returns - A processed `SpectralBuffer`.
              */
-    SpectralBuffer& Process(SpectralBuffer& fsig_in);
+    SpectralBuffer& ParallelProcess(SpectralBuffer& fsig_in);
 
     void SetScale(float scale) { kscal_ = scale; }
     void SetFormants(FORMANT formant) { keepform_ = formant; }

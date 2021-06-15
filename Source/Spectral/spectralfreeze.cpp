@@ -57,7 +57,7 @@ void SpectralFreeze::Init(SpectralBuffer& fsig_in,
     //   return OK;
 }
 
-SpectralBuffer& SpectralFreeze::Process(SpectralBuffer& fsig_in)
+SpectralBuffer& SpectralFreeze::ParallelProcess(SpectralBuffer& fsig_in)
 {
     if(fsig_in.ready)
     {

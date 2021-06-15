@@ -76,7 +76,7 @@ void SpectralScale::Init(SpectralBuffer& fsig_in,
     fft_.Init();
 }
 
-SpectralBuffer& SpectralScale::Process(SpectralBuffer& fsig_in)
+SpectralBuffer& SpectralScale::ParallelProcess(SpectralBuffer& fsig_in)
 {
     if(fsig_in.ready)
     {

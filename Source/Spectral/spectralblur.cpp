@@ -92,7 +92,7 @@ void SpectralBlur::Init(SpectralBuffer& fsig_in,
     fsig_out_.ready      = false;
 }
 
-SpectralBuffer& SpectralBlur::Process(SpectralBuffer& fsig_in)
+SpectralBuffer& SpectralBlur::ParallelProcess(SpectralBuffer& fsig_in)
 {
     if(fsig_in.ready)
     {

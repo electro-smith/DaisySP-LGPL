@@ -79,13 +79,13 @@ class SpectralAnalyzer
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
      */
-    void Sample(float sample);
+    void Process(float sample);
 
     /** Processes a block of incoming audio from the FIFO,
      *  blocks until the FIFO is filled.
      *  \returns - A reference to the internal `SpectralBuffer` containing the frequency-domain data.
      */
-    SpectralBuffer& Process(); // pvsanal
+    SpectralBuffer& ParallelProcess(); // pvsanal
 
     SpectralBuffer& GetFsig() { return fsig_out_; }
 
