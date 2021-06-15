@@ -1,8 +1,9 @@
-#include <math.h>
+#include <cmath>
 #include "dsp.h"
 #include "spectral.h"
 
 using namespace daicsp;
+using namespace std;
 
 int daicsp::GetPasses(int fft_size)
 {
@@ -31,7 +32,7 @@ float daicsp::mod2Pi(float value)
 
 void daicsp::SpectralWindow(float* windowBuffer, int type, int windowLength)
 {
-    // double  fpos, inc;
+    // float  fpos, inc;
     // float   *ftable;
     // int     i, n, flen, even;
     int i, n, even;
@@ -49,17 +50,16 @@ void daicsp::SpectralWindow(float* windowBuffer, int type, int windowLength)
             return;
         case SPECTRAL_WINDOW::KAISER: /* Kaiser */
         {
-            double beta = 6.8;
-            double x, flen2, besbeta;
-            flen2
-                = 1.0
-                  / ((double)(windowLength >> 1) * (double)(windowLength >> 1));
-            besbeta = 1.0 / Besseli(beta);
+            float beta = 6.8f;
+            float x, flen2, besbeta;
+            flen2 = 1.0f
+                    / ((float)(windowLength >> 1) * (float)(windowLength >> 1));
+            besbeta = 1.0f / Besseli(beta);
             n       = windowLength >> 1;
-            x       = (even ? 0.5 : 0.05);
-            for(i = 0; i < n; i++, x += 1.0)
+            x       = (even ? 0.5f : 0.05f);
+            for(i = 0; i < n; i++, x += 1.0f)
                 windowBuffer[i]
-                    = (float)(Besseli(beta * sqrt(1.0 - x * x * flen2))
+                    = (float)(Besseli(beta * sqrt(1.0f - x * x * flen2))
                               * besbeta);
             windowBuffer[i] = 0.0f;
         }
@@ -80,13 +80,13 @@ void daicsp::SpectralWindow(float* windowBuffer, int type, int windowLength)
     // flen = csoundGetTable(csound, &ftable, -(type));
     // if (UNLIKELY(flen < 0))
     //   return csound->InitError(csound, Str("ftable for window not found"));
-    // inc = (double)flen / (double)(windowLength & (~1));
-    // fpos = ((double)flen + (double)even * inc) * 0.5;
+    // inc = (float)flen / (float)(windowLength & (~1));
+    // fpos = ((float)flen + (float)even * inc) * 0.5;
     // n = windowLength >> 1;
     // /* this assumes that for a window with even size, space for an extra */
     // /* sample is allocated */
     // for (i = 0; i < n; i++) {
-    //   double  frac, tmp;
+    //   float  frac, tmp;
     //   int     pos;
     //   frac = modf(fpos, &tmp);
     //   pos = (int) tmp;
@@ -99,23 +99,22 @@ void daicsp::SpectralWindow(float* windowBuffer, int type, int windowLength)
 
 void daicsp::Hamming(float* windowBuffer, int windowLength, int even)
 {
-    double ftmp;
-    int    i;
+    float ftmp;
+    int   i;
 
     ftmp = PI_F / windowLength;
 
     if(even)
     {
         for(i = 0; i < windowLength; i++)
-            windowBuffer[i]
-                = (float)(0.54 + 0.46 * cos(ftmp * ((double)i + 0.5)));
+            windowBuffer[i] = (0.54f + 0.46f * cos(ftmp * ((float)i + 0.5f)));
         windowBuffer[windowLength] = 0.0f;
     }
     else
     {
         windowBuffer[0] = 1.0f;
         for(i = 1; i <= windowLength; i++)
-            windowBuffer[i] = (float)(0.54 + 0.46 * cos(ftmp * (double)i));
+            windowBuffer[i] = (0.54f + 0.46f * cos(ftmp * (float)i));
     }
 }
 
@@ -130,21 +129,21 @@ void daicsp::Vonhann(float* windowBuffer, int windowLength, int even)
     {
         for(i = 0; i < windowLength; i++)
             windowBuffer[i]
-                = (float)(0.5 + 0.5 * cos(ftmp * ((double)i + 0.5)));
+                = (float)(0.5 + 0.5 * cos(ftmp * ((float)i + 0.5f)));
         windowBuffer[windowLength] = 0.0f;
     }
     else
     {
         windowBuffer[0] = 1.0f;
         for(i = 1; i <= windowLength; i++)
-            windowBuffer[i] = (float)(0.5 + 0.5 * cos(ftmp * (double)i));
+            windowBuffer[i] = (float)(0.5 + 0.5 * cos(ftmp * (float)i));
     }
 }
 
-double daicsp::Besseli(double x)
+float daicsp::Besseli(float x)
 {
-    double ax, ans;
-    double y;
+    float ax, ans;
+    float y;
 
     if((ax = fabs(x)) < 3.75)
     {
@@ -152,44 +151,44 @@ double daicsp::Besseli(double x)
         y *= y;
         ans = (1.0
                + y
-                     * (3.5156229
+                     * (3.5156229f
                         + y
-                              * (3.0899424
+                              * (3.0899424f
                                  + y
-                                       * (1.2067492
+                                       * (1.2067492f
                                           + y
-                                                * (0.2659732
+                                                * (0.2659732f
                                                    + y
-                                                         * (0.360768e-1
-                                                            + y * 0.45813e-2))))));
+                                                         * (0.360768e-1f
+                                                            + y * 0.45813e-2f))))));
     }
     else
     {
         y   = 3.75 / ax;
         ans = ((exp(ax) / sqrt(ax))
-               * (0.39894228
+               * (0.39894228f
                   + y
-                        * (0.1328592e-1
+                        * (0.1328592e-1f
                            + y
-                                 * (0.225319e-2
+                                 * (0.225319e-2f
                                     + y
-                                          * (-0.157565e-2
+                                          * (-0.157565e-2f
                                              + y
-                                                   * (0.916281e-2
+                                                   * (0.916281e-2f
                                                       + y
-                                                            * (-0.2057706e-1
+                                                            * (-0.2057706e-1f
                                                                + y
-                                                                     * (0.2635537e-1
+                                                                     * (0.2635537e-1f
                                                                         + y
-                                                                              * (-0.1647633e-1
-                                                                                 + y * 0.392377e-2)))))))));
+                                                                              * (-0.1647633e-1f
+                                                                                 + y * 0.392377e-2f)))))))));
     }
     return ans;
 }
 
-void daicsp::Interlace(float*    fft_separated,
-                       float*    target_buffer,
-                       const int length)
+void daicsp::Interleave(float*    fft_separated,
+                        float*    target_buffer,
+                        const int length)
 {
     // unfortunately, interleaving in place is not trivial, so another buffer will have to do
     int halflen = length / 2;
@@ -200,9 +199,9 @@ void daicsp::Interlace(float*    fft_separated,
     }
 }
 
-void daicsp::Deinterlace(float*    fft_interlaced,
-                         float*    working_buffer,
-                         const int length)
+void daicsp::Deinterleave(float*    fft_interlaced,
+                          float*    working_buffer,
+                          const int length)
 {
     int halflen = length / 2;
 

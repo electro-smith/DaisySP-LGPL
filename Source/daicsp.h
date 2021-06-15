@@ -43,12 +43,9 @@
 /** Spectral Modules */
 #include "Spectral/spectral.h"
 #include "Spectral/spectralanalyzer.h"
-#include "Spectral/spectralanalyzerfifo.h"
 #include "Spectral/phasevocoder.h"
-#include "Spectral/phasevocoderfifo.h"
 #include "Spectral/spectralblur.h"
-#include "Spectral/spectralblurfifo.h"
-#include "Spectral/spectralfreezefifo.h"
+#include "Spectral/spectralfreeze.h"
 #include "Spectral/spectralscale.h"
 
 /** Utility Modules */

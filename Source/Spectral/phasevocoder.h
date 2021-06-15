@@ -1,7 +1,8 @@
 #pragma once
-#ifndef DSY_PHASEVOCODER_H
-#define DSY_PHASEVOCODER_H
+#ifndef DSY_PHASEVOCODERFIFO_H
+#define DSY_PHASEVOCODERFIFO_H
 
+#include <cstring>
 #include "spectral.h"
 #include "shy_fft.h"
 
@@ -9,10 +10,11 @@ namespace daicsp
 {
 /** PhaseVocoder
  * 
- *  Converts frequency-domain signals back to time-domain.
+ *  Converts frequency-domain signals back to time-domain using a FIFO interface.
  * 
  *  Author: Gabriel Ball
  *  Date: 2021-06-03
+ *  Ported from Csound pvsynth.
  */
 class PhaseVocoder
 {
@@ -20,33 +22,45 @@ class PhaseVocoder
     PhaseVocoder() {}
     ~PhaseVocoder() {}
 
+    /** Indicates the current status of the module. 
+         *  Warnings are indicated by a leading W, and are silently corrected. 
+         *  Errors are indicated by a leading E and cause an immediate exit.
+         * 
+         *  \param OK - No errors have been reported.
+         *  \param W_BUFFER_UNDERFLOW - The input buffer was filled before the previous buffer was fully processed.
+         *  \param W_INVALID_STATE - Against all odds, you've put the state_ property into an invalid state. 
+         *  \param E_SLIDING_NOT_IMPLEMENTED - Sliding is currently not implemented, so the overlap size must be greater than the audio block size.
+         */
     enum STATUS
     {
         OK = 0,
-        SLIDING_NOT_IMPLEMENTED,
-
+        E_SLIDING_NOT_IMPLEMENTED,
+        W_BUFFER_UNDERFLOW,
+        W_INVALID_STATE,
     };
 
-    // NOTE -- this might be useful as an overload?
-    // void Init(int fftsize, int overlap, int windowSize, SPECTRAL_WINDOW windowType, size_t sampleRate, size_t block);
+    enum STATE
+    {
+        INIT = 0,
+        IDLE,
+        PROCESSING,
+    };
 
-    /** Initializes the PhaseVocoder module.
-         *  \param fsig - Initialized frequency-domain signal from the intended source.
-         *  \param sampleRate - The program sample rate.
-         *  \param block - The program audio block size.
+    /** Initializes the PhaseVocoderFifo module.
+         *  \param fsig_in - Initialized frequency-domain signal from the intended source.
+         *  \param sample_rate - The program sample rate.
          */
-    void Init(SpectralBuffer<FFT::MAX_FLOATS + 2>& fsig,
-              size_t                               sampleRate,
-              size_t                               block);
+    void Init(SpectralBuffer& fsig_in, size_t sample_rate);
 
-    // NOTE -- probably best to not return a raw pointer
-    /** Processes an incoming fsig and returns a pointer to the resynthesized audio of the given size.
-         *  \param fsig - A `SpectralBuffer` from the source used to initialize this module.
-         *  \param size - The size of the audio block.
-         *  \returns - Pointer to an internal buffer of resynthesizes audio
+    /** Processes an incoming fsig.
+         *  \param fsig_in - A `SpectralBuffer` from the source used to initialize this module.
          */
-    float* Process(SpectralBuffer<FFT::MAX_FLOATS + 2>& fsig,
-                   size_t                               size); // pvsynth
+    void Process(SpectralBuffer& fsig_in); // pvsynth
+
+    /** Retrieves a single sample from the FIFO, and
+     *  queues the bulk processing when appropriate.
+     */
+    float Sample();
 
     /** Retrieves the current status. Useful for error checking.
          */
@@ -58,38 +72,32 @@ class PhaseVocoder
     void HaltOnError()
     {
         if(status_ != STATUS::OK)
-            while(1)
-                ;
+            while(1) {}
     }
 
   private:
     /** Corresponds to pvsynth's pvssynthset -- Phase Vocoder Synthesis _sliding_ set.
          *  This is not currently implemented, but can be useful for small overlap sizes.
          */
-    void ProcessSliding(SpectralBuffer<FFT::MAX_FLOATS + 2>& fsig,
-                        size_t                               size); // pvssynth
+    void ProcessSliding(SpectralBuffer& fsig_in,
+                        size_t          size); // pvssynth
 
-    float Tick(SpectralBuffer<FFT::MAX_FLOATS + 2>& fsig); // analyze_tick
+    float Tick(SpectralBuffer& fsig_in); // analyze_tick
 
-    void
-    GenerateFrame(SpectralBuffer<FFT::MAX_FLOATS + 2>& fsig); // process_frame
-
-    /** Interlaces real and imaginary values into real and imaginary blocks for use with shy_fft.
-         *  This is made necessary because Csound's fft function
-         *  Interleaves real and imaginary values by default.
-         *  shy_fft, on the other hand, puts real in the first
-         *  half and imaginary in the other.
-         */
-    void Deinterlace(float* interlaced, float* targetBuffer, const int length);
+    void GenerateFrame(SpectralBuffer& fsig_in); // process_frame
 
     int    buflen_;
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
     float* nextOut_;
     int    nO_, Ii_, IOi_;
-    int    outptr_;
+    size_t outptr_;
 
-    float output_[FFT::MAX_FRAMES];
-    float overlapbuf_[FFT::MAX_OVERLAP];
+    float  output_[FFT::MAX_FRAMES];
+    float  overlapbuf_[FFT::MAX_OVERLAP * 2];
+    size_t half_overlap_;
+    float* output_segment_;
+    float* process_segment_;
+
     float synbuf_[FFT::MAX_FLOATS];
     float synbufOut_[FFT::MAX_FLOATS];
     float analwinbuf_[FFT::MAX_WINDOW];
@@ -98,17 +106,15 @@ class PhaseVocoder
 
     ShyFFT<float, FFT::MAX_SIZE> fft_;
 
-    float sr_;
-    int   blockSize_;
+    float sample_rate_;
 
-    // NOTE -- ensure this is always greater than the block size!
-    float outputBuffer_[64];
     /* check these against fsig vals */
     // int overlap,winsize,fftsize,wintype,format;
     int    bin_index_; /* for phase normalization across frames */
     STATUS status_;
+    STATE  state_;
 };
 
 } // namespace daicsp
 
-#endif // DSY_PHASEVOCODER_H
+#endif // DSY_PHASEVOCODERFIFO_H

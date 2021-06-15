@@ -41,6 +41,8 @@ spectral \
 phasevocoder \
 spectralanalyzer \
 spectralblur \
+spectralscale \
+spectralfreeze
 
 UTILITY_MOD_DIR = Utility
 UTILITY_MODULES = \
@@ -65,11 +67,7 @@ CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(UTILITY_MOD_DIR)/$(UTILITY_MODU
 # debug build?
 #DEBUG = 0
 # optimization
-# OPT = -O0
-# OPT = -O3
-
-# major hack to get debugging working with daicsp
-# OPT = -g
+OPT = -O3
 
 #######################################
 # paths

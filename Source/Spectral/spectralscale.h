@@ -29,9 +29,6 @@ enum FORMANT
  * 
  *  Ported from Csound pvscale
  */
-template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = FFT_SIZE / 4,
-          size_t WINDOW_SIZE = FFT_SIZE>
 class SpectralScale
 {
   public:
@@ -61,25 +58,25 @@ class SpectralScale
              *  \param gain - Amplitude scaling. Defaults to 1.
              *  \param coefficients - The number of cepstrum coefficients used in formant preservation. Defaults to 80.
              */
-    void Init(SpectralBuffer<FFT_SIZE>& fsig_in,
-              float                     scale,
-              int                       sample_rate,
-              FORMANT                   formants     = FORMANT::NONE,
-              float                     gain         = 1.0f,
-              int                       coefficients = 80);
+    void Init(SpectralBuffer& fsig_in,
+              float           scale,
+              int             sample_rate,
+              FORMANT         formants     = FORMANT::NONE,
+              float           gain         = 1.0f,
+              int             coefficients = 80);
 
     /** Processes an incoming `SpectralBuffer`
              *  \param fsig_in - An analyzed `SpectralBuffer`.
              *  \returns - A processed `SpectralBuffer`.
              */
-    SpectralBuffer<FFT_SIZE>& Process(SpectralBuffer<FFT_SIZE>& fsig_in);
+    SpectralBuffer& Process(SpectralBuffer& fsig_in);
 
     void SetScale(float scale) { kscal_ = scale; }
     void SetFormants(FORMANT formant) { keepform_ = formant; }
     void SetGain(float gain) { gain_ = gain; }
     void SetCoefficients(float coefficients) { coefs_ = coefficients; }
 
-    SpectralBuffer<FFT_SIZE>& GetFsig() { return fsig_out_; }
+    SpectralBuffer& GetFsig() { return fsig_out_; }
 
     STATUS GetStatus() { return status_; }
 
@@ -93,21 +90,19 @@ class SpectralScale
     int    sample_rate_;
     STATUS status_;
 
-    SpectralBuffer<FFT_SIZE> fsig_out_;
-    ShyFFT<float, FFT_SIZE>  fft_;
+    SpectralBuffer               fsig_out_;
+    ShyFFT<float, FFT::MAX_SIZE> fft_;
 
     float    kscal_;
     int      keepform_;
     float    gain_;
     int      coefs_;
-    float    fenv_[FFT_SIZE + 2];
-    float    ceps_[FFT_SIZE + 2];
-    float    ceps_out_[FFT_SIZE + 2];
+    float    fenv_[FFT::MAX_FLOATS];
+    float    ceps_[FFT::MAX_FLOATS];
+    float    ceps_out_[FFT::MAX_FLOATS];
     float*   ftmp_;
     uint32_t lastframe;
 };
-
-#include "spectralscale.tcc"
 
 } // namespace daicsp
 

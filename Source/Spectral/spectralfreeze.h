@@ -2,7 +2,8 @@
 #ifndef DSY_SPECTRALFREEZEFIFO_H
 #define DSY_SPECTRALFREEZEFIFO_H
 
-#include <cstddef>
+#include <cstdint>
+#include "spectral.h"
 
 namespace daicsp
 {
@@ -13,14 +14,11 @@ namespace daicsp
  *  
  *  Ported from Csound pvsfreeze
  */
-template <size_t FFT_SIZE    = 2048,
-          size_t OVERLAP     = FFT_SIZE / 4,
-          size_t WINDOW_SIZE = FFT_SIZE>
-class SpectralFreezeFifo
+class SpectralFreeze
 {
   public:
-    SpectralFreezeFifo() {}
-    ~SpectralFreezeFifo() {}
+    SpectralFreeze() {}
+    ~SpectralFreeze() {}
 
     /** Indicates the current status of the module. 
          *  Warnings are indicated by a leading W, and are silently corrected. 
@@ -41,22 +39,22 @@ class SpectralFreezeFifo
          *  \param freeze_freq - Freezing switch for frequencies. On if above or equal to 1, and off otherwise.
          *  \param sample_rate - The program sample rate.
          */
-    void Init(SpectralBuffer<FFT_SIZE>& fsig_in,
-              float                     freeze_amp,
-              float                     freeze_freq,
-              int                       sample_rate);
+    void Init(SpectralBuffer& fsig_in,
+              float           freeze_amp,
+              float           freeze_freq,
+              int             sample_rate);
 
     /** Processes an incoming `SpectralBuffer`
          *  \param fsig_in - An analyzed `SpectralBuffer`.
          *  \returns - A processed `SpectralBuffer`.
          */
-    SpectralBuffer<FFT_SIZE>& Process(SpectralBuffer<FFT_SIZE>& fsig_in);
+    SpectralBuffer& Process(SpectralBuffer& fsig_in);
 
     void SetAmplitude(float amp) { kfra_ = amp; }
 
     void SetFrequency(float freq) { kfrf_ = freq; }
 
-    SpectralBuffer<FFT_SIZE>& GetFsig() { return fsig_out_; }
+    SpectralBuffer& GetFsig() { return fsig_out_; }
 
     STATUS GetStatus() { return status_; }
 
@@ -69,17 +67,15 @@ class SpectralFreezeFifo
 
 
   private:
-    int    sample_rate_;
-    STATUS status_;
+    uint32_t sample_rate_;
+    STATUS   status_;
 
-    SpectralBuffer<FFT_SIZE> fsig_out_;
+    SpectralBuffer fsig_out_;
 
     float    kfra_, kfrf_;
-    float    freez_[FFT_SIZE + 2];
+    float    freez_[FFT::MAX_FLOATS];
     uint32_t lastframe_;
 };
-
-#include "spectralfreezefifo.tcc"
 
 } // namespace daicsp
 

@@ -1,22 +1,26 @@
 #pragma once
-#ifndef DSY_SPECTRALANALYZER_H
-#define DSY_SPECTRALANALYZER_H
+#ifndef DSY_SPECTRALANALYZERFIFO_H
+#define DSY_SPECTRALANALYZERFIFO_H
+
+#include <cstddef>
 
 #include "spectral.h"
 #include "shy_fft.h"
 
+
 namespace daicsp
 {
-/** SpectralAnalyzer
+/** SpectralAnalyzerFifo
  * 
- *  Converts time-domain signals into frequency domain.
+ *  Converts time-domain signals into frequency domain,
+ *  and provides a FIFO interface for faster FFT 
+ *  processing.
  * 
  *  Author: Gabriel Ball
- *  Date: 2021-06-03
+ *  Date: 2021-06-10
  *  Ported from Csound pvsanal.
+ * 
  */
-
-
 class SpectralAnalyzer
 {
   public:
@@ -29,53 +33,61 @@ class SpectralAnalyzer
          * 
          *  \param OK - No errors have been reported.
          *  \param E_FFT_NOT_POWER - Currently, the fftsize must be a power of 2.
-         *  \param W_FFT_TOO_SMALL - The given fftsize is too small.
-         *  \param W_FFT_TOO_BIG - The given fftsize is too big, limited by memory usage.
+         *  \param E_FFT_TOO_SMALL - The given fftsize is too small.
          *  \param W_OVERLAP_TOO_BIG - The frame overlap is too big (must be fftsize / 2 or less)
          *  \param E_OVERLAP_TOO_SMALL - The overlap must be greater than zero.
-         *  \param W_WINDOW_TOO_SMALL - The window must be equal to or greater than fftsize.
-         *  \param W_WINDOW_TOO_BIG - The window is too big, limited by memory usage.
+         *  \param E_WINDOW_TOO_SMALL - The window must be equal to or greater than fftsize.
          *  \param W_INVALID_WINDOW - The window type is not valid (only Hamming and Hann are currently supported).
+         *  \param W_BUFFER_UNDERFLOW - The input buffer was filled before the previous buffer was fully processed.
+         *  \param W_INVALID_STATE - Against all odds, you've put the state_ property into an invalid state. 
          *  \param E_SLIDING_NOT_IMPLEMENTED - Sliding is currently not implemented, so the overlap size must be greater than the audio block size.
          */
     enum STATUS
     {
         OK = 0,
         E_FFT_NOT_POWER,
-        W_FFT_TOO_SMALL,
-        W_FFT_TOO_BIG,
+        E_FFT_TOO_SMALL,
         E_OVERLAP_TOO_SMALL,
         W_OVERLAP_TOO_BIG,
-        W_WINDOW_TOO_SMALL,
-        W_WINDOW_TOO_BIG,
+        E_WINDOW_TOO_SMALL,
         W_INVALID_WINDOW,
+        W_BUFFER_UNDERFLOW,
+        W_INVALID_STATE,
         E_SLIDING_NOT_IMPLEMENTED,
     };
 
-    /** Initializes the SpectralAnalyzer module.
-         *  \param fftsize - This determines the size of the FFT. It must be a power of two between 64 and 2048 inclusive.
-         *  \param overlap - This determines the overlap between frequency frames. It should be at least fftsize / 4, but cannot be greater than fftsize / 2.
-         *  \param windowSize - This determines the size of the analysis window. It must be greater than or equal to fftsize.
-         *  \param windowType - The windowing function. Currently, only Hamming and Hann are supported.
-         *  \param sampleRate - The program sample rate.
-         *  \param block - The program audio block size
-         */
-    void Init(int             fftsize,
-              int             overlap,
-              int             windowSize,
-              SPECTRAL_WINDOW windowType,
-              size_t          sampleRate,
-              size_t          block); //pvsanalset
+    enum STATE
+    {
+        INIT = 0,
+        IDLE,
+        PROCESSING,
+    };
 
-    /** Processes a block of incoming audio.
-         *  \param in - Pointer to a buffer of audio data.
-         *  \param size - The size of the given buffer.
-         *  \returns - A reference to the internal `SpectralBuffer` containing the frequency-domain data.
+    /** Initializes the SpectralAnalyzerFifo module.
+         *  \param fft_size - This determines the size of the FFT. It must be a power of greater than 32.
+         *  \param overlap_size - This determines the overlap between frequency frames. It should be at least fftsize / 4, but cannot be greater than fftsize / 2.
+         *  \param window_size - This determines the size of the analysis window. It must be greater than or equal to fftsize.
+         *  \param window_type - The windowing function. Currently, only Hamming and Hann are supported.
+         *  \param sample_rate - The program sample rate.
          */
-    SpectralBuffer<FFT::MAX_FLOATS + 2>& Process(const float* in,
-                                                 size_t       size); // pvsanal
+    void Init(uint32_t        fft_size,
+              uint32_t        overlap_size,
+              uint32_t        window_size,
+              SPECTRAL_WINDOW window_type,
+              size_t          sample_rate); //pvsanalset
 
-    SpectralBuffer<FFT::MAX_FLOATS + 2>& GetFsig() { return fsig_; }
+    /** Writes a single sample to the FIFO, and
+     *  queues the bulk processing when appropriate.
+     */
+    void Sample(float sample);
+
+    /** Processes a block of incoming audio from the FIFO,
+     *  blocks until the FIFO is filled.
+     *  \returns - A reference to the internal `SpectralBuffer` containing the frequency-domain data.
+     */
+    SpectralBuffer& Process(); // pvsanal
+
+    SpectralBuffer& GetFsig() { return fsig_out_; }
 
     /** Retrieves the current status. Useful for error checking.
          */
@@ -95,11 +107,11 @@ class SpectralAnalyzer
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.
          *  This is not currently implemented, but can be useful for small overlap sizes.
          */
-    void InitSliding(int             fftsize,
-                     int             overlap,
-                     int             windowSize,
-                     SPECTRAL_WINDOW windowType,
-                     size_t          sampleRate,
+    void InitSliding(uint32_t        fft_size,
+                     uint32_t        overlap_size,
+                     uint32_t        window_size,
+                     SPECTRAL_WINDOW window_type,
+                     size_t          sample_rate,
                      size_t          block); // pvssanalset
 
     void ProcessSliding(const float* in, size_t size); // pvssanal
@@ -108,14 +120,6 @@ class SpectralAnalyzer
 
     void GenerateFrame(); // generate_frame
 
-    /** Interlaces real and imaginary values from shy_fft.
-         *  This is made necessary because Csound's fft function
-         *  interleaves real and imaginary values by default.
-         *  shy_fft, on the other hand, puts real in the first
-         *  half and imaginary in the other.
-         */
-    void Interlace(float* fftSeparated, float* targetBuffer, const int length);
-
     int    buflen_;
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
     float* nextIn_;
@@ -123,14 +127,20 @@ class SpectralAnalyzer
     int    inptr_;
 
     float input_[FFT::MAX_FRAMES];
-    float overlapbuf_[FFT::MAX_OVERLAP];
+
+    // This is how we manage the input FIFO, so it's twice the size
+    float  overlapbuf_[FFT::MAX_OVERLAP * 2];
+    size_t half_overlap_;
+    float* input_segment_;
+    float* process_segment_;
+
     float analbuf_[FFT::MAX_FLOATS];
     float analbufOut_[FFT::MAX_FLOATS];
     float analwinbuf_[FFT::MAX_WINDOW];
     float oldInPhase_[FFT::MAX_BINS];
 
     // If floats aren't enough quality, return to doubles
-    // float trig_[FFT::MAX_SIZE];
+    // float trig_[FFT_SIZE];
     // float* cosine_;
     // float* sine_;
 
@@ -141,11 +151,12 @@ class SpectralAnalyzer
 
     ShyFFT<float, FFT::MAX_SIZE> fft_;
 
-    SpectralBuffer<FFT::MAX_FLOATS + 2> fsig_;
-    float                               sr_;
-    STATUS                              status_;
+    SpectralBuffer fsig_out_;
+    float          sample_rate_;
+    STATUS         status_;
+    STATE          state_;
 };
 
 } // namespace daicsp
 
-#endif // DSY_SPECTRALANALYZER_H
+#endif // DSY_SPECTRALANALYZERFIFO_H

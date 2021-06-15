@@ -6,16 +6,22 @@
 
 namespace daicsp
 {
-#define __MAX_FFT__ 4096
+// NOTE -- this macro determines the static memory allocated
+// for all spectral arrays. If you'd like to minimize the
+// memory footprint, simply define `__FFT_SIZE__` before including
+// daicsp
+#ifndef __FFT_SIZE__
+#define __FFT_SIZE__ 4096
+#endif
 
 enum FFT
 {
-    MAX_SIZE    = __MAX_FFT__,
-    MAX_WINDOW  = __MAX_FFT__ + 1,
-    MAX_FLOATS  = __MAX_FFT__ + 2,
-    MAX_BINS    = __MAX_FFT__ / 2 + 1,
-    MAX_OVERLAP = __MAX_FFT__ / 2,
-    MAX_FRAMES  = __MAX_FFT__ * 4,
+    MAX_SIZE    = __FFT_SIZE__,
+    MAX_WINDOW  = __FFT_SIZE__ + 1,
+    MAX_FLOATS  = __FFT_SIZE__ + 2,
+    MAX_BINS    = __FFT_SIZE__ / 2 + 1,
+    MAX_OVERLAP = __FFT_SIZE__ / 2,
+    MAX_FRAMES  = __FFT_SIZE__ * 4,
 
     // NOTE -- This is a temporary measure to ensure
     // the appropriate buffers have enough space for
@@ -50,7 +56,6 @@ enum SPECTRAL_FORMAT
     TRACKS,
 };
 
-template <size_t FFT_SIZE>
 struct SpectralBuffer
 {
     int          N;
@@ -61,7 +66,8 @@ struct SpectralBuffer
     int          wintype;
     int          format;
     unsigned int framecount;
-    float        frame[FFT_SIZE + 2];
+    float        frame[FFT::MAX_FLOATS];
+    bool         ready;
 };
 
 // This causes errors somehow
@@ -79,8 +85,8 @@ struct SpectralBuffer
 
 typedef struct
 {
-    float a;
-    float b;
+    float real;
+    float imaginary;
 } Complex;
 
 int GetPasses(int fft_size);
@@ -93,7 +99,7 @@ void Hamming(float* windowBuffer, int windowLength, int even);
 
 void Vonhann(float* windowBuffer, int windowLength, int even);
 
-double Besseli(double x);
+float Besseli(float x);
 
 /** Interlaces real and imaginary values from shy_fft.
          *  This is made necessary because Csound's fft function
@@ -101,11 +107,11 @@ double Besseli(double x);
          *  shy_fft, on the other hand, puts real in the first
          *  half and imaginary in the other.
          */
-void Interlace(float* fft_separated, float* target_buffer, const int length);
+void Interleave(float* fft_separated, float* target_buffer, const int length);
 
 /** Deinterlaces real and imaginary values into blocks for processing by shy_fft.
          */
-void Deinterlace(float* interlaced, float* target_buffer, const int length);
+void Deinterleave(float* interlaced, float* target_buffer, const int length);
 
 
 } // namespace daicsp
