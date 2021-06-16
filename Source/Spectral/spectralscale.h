@@ -100,7 +100,7 @@ class SpectralScale
     float    fenv_[kFFTMaxFloats];
     float    ceps_[kFFTMaxFloats];
     float    ceps_out_[kFFTMaxFloats];
-    float*   ftmp_;
+    float    ftmp_[kFFTMaxFloats];
     uint32_t lastframe;
 };
 
