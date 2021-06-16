@@ -103,7 +103,7 @@ class SpectralAnalyzer
     /** Returns the estimated latency in milliseconds
      * 
      */
-    float GetEstimatedLatency() { return (float) (overlap_frames_ * overlap_) / sample_rate_; }
+    float GetEstimatedLatency() { return (float) (num_overlaps_ * overlap_) / sample_rate_; }
 
   private:
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.
