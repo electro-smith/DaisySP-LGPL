@@ -36,6 +36,7 @@ class SpectralAnalyzer
          *  \param E_FFT_TOO_SMALL - The given fftsize is too small.
          *  \param W_OVERLAP_TOO_BIG - The frame overlap is too big (must be fftsize / 2 or less)
          *  \param E_OVERLAP_TOO_SMALL - The overlap must be greater than zero.
+         *  \param E_BLOCK_TOO_BIG - The audio block in combination with the fft size is too large for the input buffer. 
          *  \param E_WINDOW_TOO_SMALL - The window must be equal to or greater than fftsize.
          *  \param W_INVALID_WINDOW - The window type is not valid (only Hamming and Hann are currently supported).
          *  \param W_BUFFER_UNDERFLOW - The input buffer was filled before the previous buffer was fully processed.
@@ -49,18 +50,12 @@ class SpectralAnalyzer
         E_FFT_TOO_SMALL,
         E_OVERLAP_TOO_SMALL,
         W_OVERLAP_TOO_BIG,
+        E_BLOCK_TOO_BIG,
         E_WINDOW_TOO_SMALL,
         W_INVALID_WINDOW,
         W_BUFFER_UNDERFLOW,
         W_INVALID_STATE,
         E_SLIDING_NOT_IMPLEMENTED,
-    };
-
-    enum STATE
-    {
-        INIT = 0,
-        IDLE,
-        PROCESSING,
     };
 
     /** Initializes the SpectralAnalyzerFifo module.
@@ -69,12 +64,14 @@ class SpectralAnalyzer
          *  \param window_size - This determines the size of the analysis window. It must be greater than or equal to fftsize.
          *  \param window_type - The windowing function. Currently, only Hamming and Hann are supported.
          *  \param sample_rate - The program sample rate.
+         *  \param audio_block - The program audio block size.
          */
     void Init(uint32_t        fft_size,
               uint32_t        overlap_size,
               uint32_t        window_size,
               SPECTRAL_WINDOW window_type,
-              size_t          sample_rate); //pvsanalset
+              size_t          sample_rate,
+              size_t          audio_block); //pvsanalset
 
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
@@ -128,9 +125,14 @@ class SpectralAnalyzer
 
     float input_[kFFTMaxFrames];
 
-    // This is how we manage the input FIFO, so it's twice the size
-    float  overlapbuf_[kFFTMaxOverlap * 2];
-    size_t half_overlap_;
+    // This is how we manage the input FIFO, so it's larger than a single buffer.
+    float overlapbuf_[kFFTMaxOverlapBuff];
+    // This is the size of an individual overlap frame
+    size_t overlap_;
+    // This is the size of the rotating overlapbuf in terms of overlap frames
+    size_t num_overlaps_;
+    // This is the number of overlap frames that need to be processed
+    size_t input_count_;
     float* input_segment_;
     float* process_segment_;
 
@@ -154,7 +156,6 @@ class SpectralAnalyzer
     SpectralBuffer fsig_out_;
     float          sample_rate_;
     STATUS         status_;
-    STATE          state_;
 };
 
 } // namespace daicsp

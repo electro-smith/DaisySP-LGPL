@@ -27,30 +27,27 @@ class PhaseVocoder
          *  Errors are indicated by a leading E and cause an immediate exit.
          * 
          *  \param OK - No errors have been reported.
+         *  \param E_BLOCK_TOO_BIG - The audio block in combination with the fft size is too large for the input buffer. 
          *  \param W_BUFFER_UNDERFLOW - The input buffer was filled before the previous buffer was fully processed.
+         *  \param W_BUFFER_MISMATCH - The incoming signal is ready before any output is requested.
          *  \param W_INVALID_STATE - Against all odds, you've put the state_ property into an invalid state. 
          *  \param E_SLIDING_NOT_IMPLEMENTED - Sliding is currently not implemented, so the overlap size must be greater than the audio block size.
          */
     enum STATUS
     {
         OK = 0,
-        E_SLIDING_NOT_IMPLEMENTED,
+        E_BLOCK_TOO_BIG,
         W_BUFFER_UNDERFLOW,
+        W_BUFFER_MISMATCH,
         W_INVALID_STATE,
-    };
-
-    enum STATE
-    {
-        INIT = 0,
-        IDLE,
-        PROCESSING,
+        E_SLIDING_NOT_IMPLEMENTED,
     };
 
     /** Initializes the PhaseVocoderFifo module.
          *  \param fsig_in - Initialized frequency-domain signal from the intended source.
          *  \param sample_rate - The program sample rate.
          */
-    void Init(SpectralBuffer& fsig_in, size_t sample_rate);
+    void Init(SpectralBuffer& fsig_in, size_t sample_rate, size_t audio_block);
 
     /** Processes an incoming fsig in parallel to the audio callback.
          *  \param fsig_in - A `SpectralBuffer` from the source used to initialize this module.
@@ -93,8 +90,10 @@ class PhaseVocoder
     size_t outptr_;
 
     float  output_[kFFTMaxFrames];
-    float  overlapbuf_[kFFTMaxOverlap * 2];
-    size_t half_overlap_;
+    float  overlapbuf_[kFFTMaxOverlapBuff];
+    size_t overlap_;
+    size_t num_overlaps_;
+    size_t output_count_;
     float* output_segment_;
     float* process_segment_;
 
@@ -112,7 +111,6 @@ class PhaseVocoder
     // int overlap,winsize,fftsize,wintype,format;
     int    bin_index_; /* for phase normalization across frames */
     STATUS status_;
-    STATE  state_;
 };
 
 } // namespace daicsp

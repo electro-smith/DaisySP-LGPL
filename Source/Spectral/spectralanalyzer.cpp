@@ -13,10 +13,10 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
                             uint32_t        overlap_size,
                             uint32_t        window_size,
                             SPECTRAL_WINDOW window_type,
-                            size_t          sample_rate)
+                            size_t          sample_rate,
+                            size_t          audio_block)
 {
     status_ = STATUS::OK;
-    state_  = STATE::INIT;
 
     float *analwinhalf, *analwinbase;
     float  sum;
@@ -73,7 +73,22 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
         //                          Str("pvsanal: overlap too big for fft size\n"));
     }
 
-    half_overlap_  = overlap;
+    overlap_      = overlap;
+    num_overlaps_ = 1 + ceil((float)audio_block / overlap);
+    input_count_  = 0;
+
+    // This occurs because I've decided to limit the
+    // maximum overlap buffer to twice that of a single
+    // buffer at max size. I think this is permissible
+    // because it's extremely unlikely that someone
+    // would have both a large fft size and a large
+    // (> 1024) audio block on actual hardware.
+    if(overlap_ * num_overlaps_ > kFFTMaxOverlapBuff)
+    {
+        status_ = STATUS::E_BLOCK_TOO_BIG;
+        return;
+    }
+
     input_segment_ = overlapbuf_;
     // Initially, the analyzer will be idle, waiting for
     // the input to be filled. When it's actually processing,
@@ -263,14 +278,37 @@ void SpectralAnalyzer::InitSliding(uint32_t        fft_size,
     // fft_.Init();
 }
 
+void SpectralAnalyzer::Process(float sample)
+{
+    if(inptr_ == overlap_)
+    {
+        inptr_         = 0;
+        input_segment_ = input_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+                             ? overlapbuf_
+                             : input_segment_ + overlap_;
+        input_count_++;
+        if(input_count_ > num_overlaps_)
+        {
+            status_ = STATUS::W_BUFFER_UNDERFLOW;
+        }
+    }
+
+    input_segment_[inptr_++] = sample;
+}
+
 SpectralBuffer &SpectralAnalyzer::ParallelProcess()
 {
-    if(state_ == STATE::PROCESSING)
+    if(input_count_ > 0)
     {
         GenerateFrame();
-        state_ = STATE::IDLE;
+        input_count_--;
         fsig_out_.framecount++;
         fsig_out_.ready = true;
+
+        process_segment_
+            = process_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+                  ? overlapbuf_
+                  : process_segment_ + overlap_;
     }
     else
     {
@@ -278,17 +316,6 @@ SpectralBuffer &SpectralAnalyzer::ParallelProcess()
     }
 
     return fsig_out_;
-
-
-    // // float *ain;
-    // // uint32_t offset = h.insdshead->ksmps_offset;
-    // // uint32_t early  = h.insdshead->ksmps_no_end;
-    // // uint32_t i, nsmps = block;
-    // uint32_t early  = 0;
-    // uint32_t offset = 0;
-    // uint32_t i, nsmps = size;
-
-    // // ain = ain;
 
     // // NOTE -- keep this in mind if we decide to dynamically allocate
     // // if (input.auxp==NULL) {
@@ -310,34 +337,6 @@ SpectralBuffer &SpectralAnalyzer::ParallelProcess()
     // }
 
     // return fsig_;
-}
-
-void SpectralAnalyzer::Process(float sample)
-{
-    if(inptr_ == fsig_out_.overlap)
-    {
-        inptr_ = 0;
-        switch(state_)
-        {
-            case STATE::INIT:
-                input_segment_ = overlapbuf_ + half_overlap_;
-                state_         = STATE::PROCESSING;
-                break;
-            case STATE::IDLE:
-                input_segment_ = (input_segment_ == overlapbuf_)
-                                     ? overlapbuf_ + half_overlap_
-                                     : overlapbuf_;
-                process_segment_ = (process_segment_ == overlapbuf_)
-                                       ? overlapbuf_ + half_overlap_
-                                       : overlapbuf_;
-                state_ = STATE::PROCESSING;
-                break;
-            case STATE::PROCESSING: status_ = STATUS::W_BUFFER_UNDERFLOW; break;
-            default: status_ = STATUS::W_INVALID_STATE; break;
-        }
-    }
-
-    input_segment_[inptr_++] = sample;
 }
 
 //

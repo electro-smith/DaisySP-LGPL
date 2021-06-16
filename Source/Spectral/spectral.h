@@ -14,12 +14,13 @@ namespace daicsp
 #define __FFT_SIZE__ 4096
 #endif
 
-static constexpr unsigned int kFFTMaxSize    = __FFT_SIZE__;
-static constexpr unsigned int kFFTMaxWindow  = __FFT_SIZE__ + 1;
-static constexpr unsigned int kFFTMaxFloats  = __FFT_SIZE__ + 2;
-static constexpr unsigned int kFFTMaxBins    = __FFT_SIZE__ / 2 + 1;
-static constexpr unsigned int kFFTMaxOverlap = __FFT_SIZE__ / 2;
-static constexpr unsigned int kFFTMaxFrames  = __FFT_SIZE__ * 4;
+static constexpr unsigned int kFFTMaxSize        = __FFT_SIZE__;
+static constexpr unsigned int kFFTMaxWindow      = __FFT_SIZE__ + 1;
+static constexpr unsigned int kFFTMaxFloats      = __FFT_SIZE__ + 2;
+static constexpr unsigned int kFFTMaxBins        = __FFT_SIZE__ / 2 + 1;
+static constexpr unsigned int kFFTMaxOverlap     = __FFT_SIZE__ / 2;
+static constexpr unsigned int kFFTMaxOverlapBuff = kFFTMaxOverlap * 3;
+static constexpr unsigned int kFFTMaxFrames      = __FFT_SIZE__ * 4;
 // NOTE -- This is a temporary measure to ensure
 // the appropriate buffers have enough space for
 // sliding and non-sliding applications. It is

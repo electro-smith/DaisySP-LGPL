@@ -7,10 +7,11 @@
 using namespace daicsp;
 using namespace std;
 
-void PhaseVocoder::Init(SpectralBuffer &fsig_in, size_t sample_rate)
+void PhaseVocoder::Init(SpectralBuffer &fsig_in,
+                        size_t          sample_rate,
+                        size_t          audio_block)
 {
     status_      = STATUS::OK;
-    state_       = STATE::INIT;
     sample_rate_ = sample_rate;
 
     float *analwinhalf;
@@ -32,9 +33,18 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in, size_t sample_rate)
     int M       = fsig_in.winsize;
     int wintype = fsig_in.wintype;
 
-    half_overlap_    = overlap;
+    overlap_      = overlap;
+    num_overlaps_ = 1 + ceil((float)audio_block / overlap);
+    output_count_ = 0;
+
+    if(overlap_ * num_overlaps_ > kFFTMaxOverlapBuff)
+    {
+        status_ = STATUS::E_BLOCK_TOO_BIG;
+        return;
+    }
+
     output_segment_  = overlapbuf_;
-    process_segment_ = overlapbuf_;
+    process_segment_ = output_segment_;
 
     // NOTE -- these would be useful for in-depth error checking
     // p->fftsize = N;
@@ -187,26 +197,17 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in, size_t sample_rate)
 
 float PhaseVocoder::Process()
 {
-    if(outptr_ == half_overlap_)
+    if(outptr_ == overlap_)
     {
         outptr_ = 0;
-        switch(state_)
+        output_segment_
+            = output_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+                  ? overlapbuf_
+                  : output_segment_ + overlap_;
+        output_count_++;
+        if(output_count_ >= num_overlaps_)
         {
-            case STATE::INIT:
-                output_segment_ = overlapbuf_ + half_overlap_;
-                state_          = STATE::PROCESSING;
-                break;
-            case STATE::IDLE:
-                output_segment_ = (output_segment_ == overlapbuf_)
-                                      ? overlapbuf_ + half_overlap_
-                                      : overlapbuf_;
-                process_segment_ = (process_segment_ == overlapbuf_)
-                                       ? overlapbuf_ + half_overlap_
-                                       : overlapbuf_;
-                state_ = STATE::PROCESSING;
-                break;
-            case STATE::PROCESSING: status_ = STATUS::W_BUFFER_UNDERFLOW; break;
-            default: status_ = STATUS::W_INVALID_STATE; break;
+            status_ = STATUS::W_BUFFER_UNDERFLOW;
         }
     }
 
@@ -215,24 +216,6 @@ float PhaseVocoder::Process()
 
 void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
 {
-    // // int offset = h.insdshead->ksmps_offset;
-    // // int early  = h.insdshead->ksmps_no_end;
-    // int offset = 0;
-    // // int early = 0;
-
-    // int i, nsmps = size;
-
-    // // if (output.auxp==NULL) {
-    // //   return csound->PerfError(csound,&(h),
-    // //                            Str("pvsynth: Not Initialised.\n"));
-    // // }
-
-    // // NOTE -- could these be useful for handling
-    // // if (offset) memset(outputBuffer, '\0', offset*sizeof(float));
-    // // if (early) {
-    // //   nsmps -= early;
-    // //   memset(&outputBuffer[nsmps], '\0', early*sizeof(float));
-    // // }
     // if(fsig.sliding)
     // {
     //     ProcessSliding(fsig, size);
@@ -247,12 +230,19 @@ void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
 
     if(fsig_in.ready)
     {
-        if(state_ != STATE::PROCESSING)
+        if(output_count_ == 0)
         {
-            status_ = STATUS::W_BUFFER_UNDERFLOW;
+            status_ = STATUS::W_BUFFER_MISMATCH;
         }
-        GenerateFrame(fsig_in);
-        state_ = STATE::IDLE;
+        else
+        {
+            GenerateFrame(fsig_in);
+            output_count_--;
+            process_segment_
+                = process_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+                      ? overlapbuf_
+                      : process_segment_ + overlap_;
+        }
     }
 }
 
