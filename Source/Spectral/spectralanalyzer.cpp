@@ -283,7 +283,7 @@ void SpectralAnalyzer::Process(float sample)
     if(inptr_ == overlap_)
     {
         inptr_         = 0;
-        input_segment_ = input_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+        input_segment_ = (size_t) (input_segment_ - overlapbuf_) > overlap_ * num_overlaps_
                              ? overlapbuf_
                              : input_segment_ + overlap_;
         input_count_++;
@@ -306,7 +306,7 @@ SpectralBuffer &SpectralAnalyzer::ParallelProcess()
         fsig_out_.ready = true;
 
         process_segment_
-            = process_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+            = (size_t) (process_segment_ - overlapbuf_) > overlap_ * num_overlaps_
                   ? overlapbuf_
                   : process_segment_ + overlap_;
     }

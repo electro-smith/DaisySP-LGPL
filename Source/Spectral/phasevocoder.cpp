@@ -201,7 +201,7 @@ float PhaseVocoder::Process()
     {
         outptr_ = 0;
         output_segment_
-            = output_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+            = (size_t) (output_segment_ - overlapbuf_) > overlap_ * num_overlaps_
                   ? overlapbuf_
                   : output_segment_ + overlap_;
         output_count_++;
@@ -239,7 +239,7 @@ void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
             GenerateFrame(fsig_in);
             output_count_--;
             process_segment_
-                = process_segment_ - overlapbuf_ > overlap_ * num_overlaps_
+                = (size_t) (process_segment_ - overlapbuf_) > overlap_ * num_overlaps_
                       ? overlapbuf_
                       : process_segment_ + overlap_;
         }

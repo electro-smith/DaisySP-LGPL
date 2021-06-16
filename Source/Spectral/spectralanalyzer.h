@@ -100,6 +100,11 @@ class SpectralAnalyzer
                 ;
     }
 
+    /** Returns the estimated latency in milliseconds
+     * 
+     */
+    float GetEstimatedLatency() { return (float) (overlap_frames_ * overlap_) / sample_rate_; }
+
   private:
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.
          *  This is not currently implemented, but can be useful for small overlap sizes.
@@ -121,7 +126,7 @@ class SpectralAnalyzer
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
     float* nextIn_;
     int    nI_, Ii_, IOi_;
-    int    inptr_;
+    size_t    inptr_;
 
     float input_[kFFTMaxFrames];
 
