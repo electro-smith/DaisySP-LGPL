@@ -27,7 +27,7 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
     uint32_t M       = window_size;
     uint32_t overlap = overlap_size;
 
-    if(overlap < 48 || overlap <= 10) /* 10 is a guess.... */
+    if(overlap <= 10) /* 10 is a guess.... */
     {
         // return pvssanalset(csound, p);
 
@@ -74,7 +74,7 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
     }
 
     overlap_      = overlap;
-    num_overlaps_ = ceil((float)audio_block / overlap) * 2;
+    num_overlaps_ = ceil((float)audio_block / overlap) * 4;
     input_count_  = 0;
 
     // This occurs because I've decided to limit the

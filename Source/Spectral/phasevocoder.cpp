@@ -34,7 +34,7 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
     int wintype = fsig_in.wintype;
 
     overlap_      = overlap;
-    num_overlaps_ = ceil((float)audio_block / overlap) * 2;
+    num_overlaps_ = ceil((float)audio_block / overlap) * 4;
     output_count_ = 0;
 
     if(overlap_ * num_overlaps_ > kFFTMaxOverlapBuff)
@@ -42,6 +42,8 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
         status_ = STATUS::E_BLOCK_TOO_BIG;
         return;
     }
+
+    memset(overlapbuf_, 0, overlap_ * num_overlaps_);
 
     output_segment_  = overlapbuf_;
     process_segment_ = output_segment_;
