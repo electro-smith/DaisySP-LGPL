@@ -100,10 +100,15 @@ class SpectralAnalyzer
                 ;
     }
 
-    /** Returns the estimated latency in milliseconds
+    /** Returns the estimated latency in seconds
      * 
      */
     float GetEstimatedLatency() { return (float) (num_overlaps_ * overlap_) / sample_rate_; }
+
+    /** Check if the analyzer is ready for processing
+     * 
+     */
+    int GetQueuedFrameCount() { return input_count_; }
 
   private:
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.

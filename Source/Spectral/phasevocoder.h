@@ -72,6 +72,11 @@ class PhaseVocoder
             while(1) {}
     }
 
+    /** Check if the vocoder is ready for processing
+     * 
+     */
+    int GetQueuedFrameCount() { return output_count_; }
+
   private:
     /** Corresponds to pvsynth's pvssynthset -- Phase Vocoder Synthesis _sliding_ set.
          *  This is not currently implemented, but can be useful for small overlap sizes.
