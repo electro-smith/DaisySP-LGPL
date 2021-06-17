@@ -75,7 +75,7 @@ class PhaseVocoder
     /** Check if the vocoder is ready for processing
      * 
      */
-    int GetQueuedFrameCount() { return output_count_; }
+    size_t GetQueuedFrameCount() { return output_count_; }
 
   private:
     /** Corresponds to pvsynth's pvssynthset -- Phase Vocoder Synthesis _sliding_ set.
@@ -116,6 +116,7 @@ class PhaseVocoder
     // int overlap,winsize,fftsize,wintype,format;
     int    bin_index_; /* for phase normalization across frames */
     STATUS status_;
+    size_t frames_processed_;
 };
 
 } // namespace daicsp

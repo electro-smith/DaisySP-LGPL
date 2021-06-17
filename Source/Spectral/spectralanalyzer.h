@@ -108,7 +108,7 @@ class SpectralAnalyzer
     /** Check if the analyzer is ready for processing
      * 
      */
-    int GetQueuedFrameCount() { return input_count_; }
+    size_t GetQueuedFrameCount() { return input_count_; }
 
   private:
     /** Corresponds to pvsanal's pvssanalset -- Phase Vocoder Synthesis _sliding_ analysis set.
