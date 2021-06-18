@@ -194,8 +194,10 @@ void daicsp::Interleave(float*    fft_separated,
     int halflen = length / 2;
     for(int i = 0; i < halflen; i++)
     {
-        target_buffer[i * 2]     = fft_separated[i];
-        target_buffer[i * 2 + 1] = fft_separated[i + halflen];
+        // target offset by 2 because shy_fft doesn't
+        // provide leading DC and Nyquist data
+        target_buffer[2 + i * 2]     = fft_separated[i];
+        target_buffer[2 + i * 2 + 1] = fft_separated[i + halflen];
     }
 }
 
@@ -207,8 +209,8 @@ void daicsp::Deinterleave(float*    fft_interlaced,
 
     for(int i = 0; i < halflen; i++)
     {
-        working_buffer[i]           = fft_interlaced[i * 2];
-        working_buffer[i + halflen] = fft_interlaced[i * 2 + 1];
+        working_buffer[i]           = fft_interlaced[2 + i * 2];
+        working_buffer[i + halflen] = fft_interlaced[2 + i * 2 + 1];
     }
 
     for(int i = 0; i < length; i++)

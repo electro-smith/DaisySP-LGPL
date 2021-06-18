@@ -96,8 +96,7 @@ class SpectralAnalyzer
     void HaltOnError()
     {
         if(status_ != STATUS::OK)
-            while(1)
-                ;
+            while(1) {}
     }
 
     /** Returns the estimated latency in seconds
