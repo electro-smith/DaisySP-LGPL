@@ -49,7 +49,7 @@
 #include "Spectral/spectralscale.h"
 
 /** Utility Modules */
-#include "Utility/dsp.h"
+#include "Utility/dsy_lgpl_dsp.h"
 #include "Utility/jitter.h"
 #include "Utility/port.h"
 

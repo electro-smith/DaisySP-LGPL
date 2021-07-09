@@ -1,6 +1,6 @@
 #include "atone.h"
 #include <math.h>
-#include "dsp.h"
+#include "dsy_lgpl_dsp.h"
 
 using namespace daicsp;
 

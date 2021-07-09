@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cmath>
 #include "spectral.h"
-#include "dsp.h"
+#include "dsy_lgpl_dsp.h"
 #include "phasevocoder.h"
 
 using namespace daicsp;

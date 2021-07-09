@@ -1,5 +1,5 @@
 #include <cmath>
-#include "dsp.h"
+#include "dsy_lgpl_dsp.h"
 #include "spectral.h"
 
 using namespace daicsp;

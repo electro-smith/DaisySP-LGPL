@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cstring>
 
-#include "dsp.h"
+#include "dsy_lgpl_dsp.h"
 #include "spectral.h"
 #include "spectralanalyzer.h"
 

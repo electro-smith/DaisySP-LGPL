@@ -3,7 +3,7 @@
 #define DSY_COMB_H
 #ifdef __cplusplus
 
-#include "Utility/dsp.h"
+#include "Utility/dsy_lgpl_dsp.h"
 
 namespace daicsp
 {

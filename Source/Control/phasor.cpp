@@ -1,6 +1,6 @@
 #include <math.h>
 #include "phasor.h"
-#include "dsp.h"
+#include "dsy_lgpl_dsp.h"
 
 using namespace daicsp;
 
