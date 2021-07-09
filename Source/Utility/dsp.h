@@ -1,8 +1,8 @@
 /** Helpful defines, functions, and other utilities for use in/with DaiCsP modules.
 */
 #pragma once
-#ifndef DSY_CORE_DSP
-#define DSY_CORE_DSP
+#ifndef DSY_CORE_DSP_LGPL
+#define DSY_CORE_DSP_LGPL
 #include <math.h>
 
 /** PIs
