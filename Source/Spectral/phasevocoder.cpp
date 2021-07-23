@@ -9,7 +9,8 @@ using namespace std;
 
 void PhaseVocoder::Init(SpectralBuffer &fsig_in,
                         size_t          sample_rate,
-                        size_t          audio_block)
+                        size_t          audio_block,
+                        DsyFFT *        fft)
 {
     status_      = STATUS::OK;
     sample_rate_ = sample_rate;
@@ -70,8 +71,8 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
         // NOTE -- sliding not currently implemented
         status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;
         return;
-
-        fft_.Init();
+        fft_ = fft;
+        fft_->Init();
         return;
     }
 
@@ -194,18 +195,18 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
     //   p->setup = csound->RealFFT2Setup(csound,N,FFT_INV);
     // return OK;
 
-    fft_.Init();
+    fft_->Init(); /** double FFT init may cause problems */
 }
 
 float PhaseVocoder::Process()
 {
     if(outptr_ == overlap_)
     {
-        outptr_ = 0;
-        output_segment_
-            = (size_t) (output_segment_ - overlapbuf_) >= overlap_ * (num_overlaps_ - 1)
-                  ? overlapbuf_
-                  : output_segment_ + overlap_;
+        outptr_         = 0;
+        output_segment_ = (size_t)(output_segment_ - overlapbuf_)
+                                  >= overlap_ * (num_overlaps_ - 1)
+                              ? overlapbuf_
+                              : output_segment_ + overlap_;
         output_count_++;
         if(output_count_ >= num_overlaps_)
         {
@@ -241,10 +242,10 @@ void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
             GenerateFrame(fsig_in);
             output_count_--;
             frames_processed_++;
-            process_segment_
-                = (size_t) (process_segment_ - overlapbuf_) >= overlap_ * (num_overlaps_ - 1)
-                      ? overlapbuf_
-                      : process_segment_ + overlap_;
+            process_segment_ = (size_t)(process_segment_ - overlapbuf_)
+                                       >= overlap_ * (num_overlaps_ - 1)
+                                   ? overlapbuf_
+                                   : process_segment_ + overlap_;
         }
     }
 }
@@ -395,11 +396,11 @@ void PhaseVocoder::GenerateFrame(SpectralBuffer &fsig_in)
     if(NO != kFFTMaxSize)
     {
         int num_passes = GetPasses(NO);
-        fft_.Inverse(syn, synbufOut_, num_passes);
+        fft_->Inverse(syn, synbufOut_, num_passes);
     }
     else
     {
-        fft_.Inverse(syn, synbufOut_);
+        fft_->Inverse(syn, synbufOut_);
     }
 
     // NOTE -- shy_fft outputs raw inverse values, ranging from +- the

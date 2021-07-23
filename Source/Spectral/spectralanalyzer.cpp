@@ -14,7 +14,8 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
                             uint32_t        window_size,
                             SPECTRAL_WINDOW window_type,
                             size_t          sample_rate,
-                            size_t          audio_block)
+                            size_t          audio_block,
+                            DsyFFT *fft)
 {
     status_ = STATUS::OK;
 
@@ -188,7 +189,8 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
     // return OK;
 
     sample_rate_ = sample_rate;
-    fft_.Init();
+    fft_ = fft;
+    fft_->Init();
 }
 
 void SpectralAnalyzer::InitSliding(uint32_t        fft_size,
@@ -727,11 +729,11 @@ void SpectralAnalyzer::GenerateFrame()
     if(N != kFFTMaxSize)
     {
         int num_passes = GetPasses(N);
-        fft_.Direct(anal, analOut, num_passes);
+        fft_->Direct(anal, analOut, num_passes);
     }
     else
     {
-        fft_.Direct(anal, analOut);
+        fft_->Direct(anal, analOut);
     }
     Interleave(analOut, anal, N);
 

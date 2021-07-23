@@ -71,7 +71,8 @@ class SpectralAnalyzer
               uint32_t        window_size,
               SPECTRAL_WINDOW window_type,
               size_t          sample_rate,
-              size_t          audio_block); //pvsanalset
+              size_t          audio_block,
+              DsyFFT *fft); //pvsanalset
 
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
@@ -160,7 +161,7 @@ class SpectralAnalyzer
     float* cosine_;
     float* sine_;
 
-    ShyFFT<float, kFFTMaxSize> fft_;
+    DsyFFT *fft_;
 
     SpectralBuffer fsig_out_;
     float          sample_rate_;

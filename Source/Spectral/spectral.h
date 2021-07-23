@@ -3,6 +3,7 @@
 #define DSY_SPECTRAL_H
 
 #include <cstddef>
+#include "shy_fft.h"
 
 namespace daicsp
 {
@@ -30,6 +31,8 @@ static constexpr unsigned int kFFTMaxFrames      = __FFT_SIZE__ * 4;
 // size may not be known at compile time.
 // (this assumes 48)
 static constexpr unsigned int kFFTMaxSlide = 4704;
+
+using DsyFFT = ShyFFT<float, kFFTMaxSize>;
 
 enum SPECTRAL_WINDOW
 {

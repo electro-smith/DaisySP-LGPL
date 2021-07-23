@@ -47,7 +47,10 @@ class PhaseVocoder
          *  \param fsig_in - Initialized frequency-domain signal from the intended source.
          *  \param sample_rate - The program sample rate.
          */
-    void Init(SpectralBuffer& fsig_in, size_t sample_rate, size_t audio_block);
+    void Init(SpectralBuffer& fsig_in,
+              size_t          sample_rate,
+              size_t          audio_block,
+              DsyFFT*         fft);
 
     /** Processes an incoming fsig in parallel to the audio callback.
          *  \param fsig_in - A `SpectralBuffer` from the source used to initialize this module.
@@ -108,7 +111,7 @@ class PhaseVocoder
     float synwinbuf_[kFFTMaxWindow];
     float oldOutPhase_[kFFTMaxBins];
 
-    ShyFFT<float, kFFTMaxSize> fft_;
+    ShyFFT<float, kFFTMaxSize>* fft_;
 
     float sample_rate_;
 
