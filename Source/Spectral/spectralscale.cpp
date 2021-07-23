@@ -25,7 +25,7 @@ void SpectralScale::Init(SpectralBuffer& fsig_in,
 
     //   if (UNLIKELY(fin == fsig_out_))
     //     csound->Warning(csound, Str("Unsafe to have same fsig as in and out"));
-    if(&fsig_in == &fsig_out_)
+    if(fsig_in == fsig_out_)
     {
         status_ = STATUS::E_FSIG_EQUAL;
         return;

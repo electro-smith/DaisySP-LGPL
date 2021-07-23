@@ -18,7 +18,7 @@ void SpectralSmooth::Init(SpectralBuffer& fsig_in,
 
   int    N = fsig_in.N;
 
-  if(&fsig_in == &fsig_out_)
+  if(fsig_in == fsig_out_)
   {
       status_ = STATUS::E_FSIG_EQUAL;
       return;
