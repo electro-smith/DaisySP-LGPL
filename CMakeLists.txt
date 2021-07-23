@@ -26,6 +26,7 @@ Source/Spectral/phasevocoder.cpp
 Source/Spectral/spectralblur.cpp
 Source/Spectral/spectralfreeze.cpp
 Source/Spectral/spectralscale.cpp
+Source/Spectral/spectralsmooth.cpp
 )
 
 set( HEADER_FILES
@@ -52,6 +53,7 @@ Source/Spectral/phasevocoder.h
 Source/Spectral/spectralblur.h
 Source/Spectral/spectralfreeze.h
 Source/Spectral/spectralscale.h
+Source/Spectral/spectralsmooth.h
 )
 
 include_directories(Source)
