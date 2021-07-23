@@ -25,11 +25,13 @@ class SpectralFreeze
          *  Errors are indicated by a leading E and cause an immediate exit.
          * 
          *  \param OK - No errors have been reported.
+         *  \param E_FSIG_EQUAL - The input and output `SpectralBuffer` cannot be the same.
          *  \param E_SLIDING_NOT_IMPLEMENTED - Sliding is currently not implemented, so the overlap size must be greater than the audio block size.
          */
     enum STATUS
     {
         OK = 0,
+        E_FSIG_EQUAL,
         E_SLIDING_NOT_IMPLEMENTED,
     };
 

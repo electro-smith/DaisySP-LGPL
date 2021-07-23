@@ -56,6 +56,18 @@ enum SPECTRAL_FORMAT
     TRACKS,
 };
 
+/** Formant preservation methods
+ *  \param NONE - formants are not preserved
+ *  \param LIFTERED - formants are preserved using a liftered cepstrum method
+ *  \param ENVELOPE - formants are preserved using a true envelope method
+ */
+enum FORMANT
+{
+    NONE     = 0,
+    LIFTERED = 1,
+    ENVELOPE = 2,
+};
+
 struct SpectralBuffer
 {
     int          N;
@@ -68,20 +80,10 @@ struct SpectralBuffer
     unsigned int framecount;
     float        frame[kFFTMaxFloats];
     bool         ready;
-};
 
-// This causes errors somehow
-// Allowing for easy test to ensure fsigIn != fsigOut
-// bool operator==(SpectralBuffer& fsig1, SpectralBuffer& fsig2)
-// {
-//     if(&fsig1 == &fsig2) return true;
-//     else return false;
-// }
-// bool operator!=(SpectralBuffer& fsig1, SpectralBuffer& fsig2)
-// {
-//     if(&fsig1 != &fsig2) return true;
-//     else return false;
-// }
+    bool operator==(SpectralBuffer& other) { return this == &other; }
+    bool operator!=(SpectralBuffer& other) { return this != &other; }
+};
 
 typedef struct
 {

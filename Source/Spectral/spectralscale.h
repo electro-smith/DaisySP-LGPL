@@ -8,17 +8,6 @@
 
 namespace daicsp
 {
-/** Formant preservation methods for `SpectralScale`
- *  \param NONE - formants are not preserved
- *  \param LIFTERED - formants are preserved using a liftered cepstrum method
- *  \param ENVELOPE - formants are preserved using a true envelope method
- */
-enum FORMANT
-{
-    NONE     = 0,
-    LIFTERED = 1,
-    ENVELOPE = 2,
-};
 
 /** SpectralScale
  * 

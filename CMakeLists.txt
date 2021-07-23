@@ -27,6 +27,7 @@ Source/Spectral/spectralblur.cpp
 Source/Spectral/spectralfreeze.cpp
 Source/Spectral/spectralscale.cpp
 Source/Spectral/spectralsmooth.cpp
+Source/Spectral/spectralshift.cpp
 )
 
 set( HEADER_FILES
@@ -54,6 +55,7 @@ Source/Spectral/spectralblur.h
 Source/Spectral/spectralfreeze.h
 Source/Spectral/spectralscale.h
 Source/Spectral/spectralsmooth.h
+Source/Spectral/spectralshift.h
 )
 
 include_directories(Source)
