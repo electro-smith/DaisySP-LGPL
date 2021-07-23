@@ -11,7 +11,7 @@ namespace daicsp
 
 /** SpectralSmooth
  * 
- *  Scales the pitch of a frequency-domain signal. 
+ *  Smooths the input frequency spectrum over time. 
  * 
  *  Author: Gabriel Ball
  *  Date: 2021-07-23

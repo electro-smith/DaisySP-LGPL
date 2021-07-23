@@ -48,6 +48,7 @@
 #include "Spectral/spectralfreeze.h"
 #include "Spectral/spectralscale.h"
 #include "Spectral/spectralsmooth.h"
+#include "Spectral/spectralshift.h"
 
 /** Utility Modules */
 #include "Utility/dsp.h"

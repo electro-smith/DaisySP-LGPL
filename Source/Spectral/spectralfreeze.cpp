@@ -27,6 +27,13 @@ void SpectralFreeze::Init(SpectralBuffer& fsig_in,
 
     fsig_out_.NB      = (N / 2) + 1;
     fsig_out_.sliding = fsig_in.sliding;
+
+    if (fsig_in == fsig_out_)
+    {
+      status_ = STATUS::E_FSIG_EQUAL;
+      return;
+    }
+
     if(fsig_in.sliding)
     {
         status_ = STATUS::E_SLIDING_NOT_IMPLEMENTED;

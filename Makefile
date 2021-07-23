@@ -43,7 +43,8 @@ spectralanalyzer \
 spectralblur \
 spectralscale \
 spectralfreeze \
-spectralsmooth
+spectralsmooth \
+spectralshift
 
 UTILITY_MOD_DIR = Utility
 UTILITY_MODULES = \
