@@ -48,7 +48,7 @@ int ReverbSc::Init(float sr)
     sample_rate_   = sr;
     feedback_      = 0.97;
     lpfreq_        = 10000;
-    i_pitch_mod_   = 1;
+    i_pitch_mod_   = 10; 
     i_skip_init_   = 0;
     damp_fact_     = 1.0;
     prv_lpfreq_    = 0.0;
@@ -57,12 +57,13 @@ int ReverbSc::Init(float sr)
     n_bytes = 0;
     for(i = 0; i < 8; i++)
     {
-        if(n_bytes > DSY_REVERBSC_MAX_SIZE)
+        if(n_bytes > DAICSP_REVERBSC_MAX_SIZE)
             return 1;
         delay_lines_[i].buf = (aux_) + n_bytes;
         InitDelayLine(&delay_lines_[i], i);
-        n_bytes += DelayLineBytesAlloc(sr, 1, i);
+        n_bytes += DelayLineBytesAlloc(sr, i_pitch_mod_, i);
     }
+    //i_pitch_mod_ = 1;
     return 0;
 }
 
@@ -116,7 +117,7 @@ int ReverbSc::InitDelayLine(ReverbScDl *lp, int n)
     /* int     i; */
 
     /* calculate length of delay line */
-    lp->buffer_size = DelayLineMaxSamples(sample_rate_, 1, n);
+    lp->buffer_size = DelayLineMaxSamples(sample_rate_, i_pitch_mod_, n);
     lp->dummy       = 0;
     lp->write_pos   = 0;
     /* set random seed */

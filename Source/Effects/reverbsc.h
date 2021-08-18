@@ -1,8 +1,9 @@
 #pragma once
-#ifndef DSYSP_REVERBSC_H
-#define DSYSP_REVERBSC_H
+#ifndef DAICSP_REVERBSC_H
+#define DAICSP_REVERBSC_H
 
-#define DSY_REVERBSC_MAX_SIZE 98936
+//#define DAICSP_REVERBSC_MAX_SIZE 98936
+#define DAICSP_REVERBSC_MAX_SIZE 98936 * 2
 
 namespace daicsp
 {
@@ -49,11 +50,16 @@ class ReverbSc
     /** controls the reverb time. reverb tail becomes infinite when set to 1.0
         \param fb - sets reverb time. range: 0.0 to 1.0
     */
-    inline void SetFeedback(const float &fb) { feedback_ = fb; }
+    inline void SetFeedback(float fb) { feedback_ = fb; }
     /** controls the internal dampening filter's cutoff frequency.
         \param freq - low pass frequency. range: 0.0 to sample_rate / 2
     */
-    inline void SetLpFreq(const float &freq) { lpfreq_ = freq; }
+    inline void SetLpFreq(float freq) { lpfreq_ = freq; }
+
+    /** controls the depth of pitch modulation added to delay lines 
+     * \param val - range 0 to 10, defaults to 1
+    */
+    inline void SetPitchMod(float val) { i_pitch_mod_ = val; }
 
   private:
     void       NextRandomLineseg(ReverbScDl *lp, int n);
@@ -65,7 +71,7 @@ class ReverbSc
     float      prv_lpfreq_;
     int        init_done_;
     ReverbScDl delay_lines_[8];
-    float      aux_[DSY_REVERBSC_MAX_SIZE];
+    float      aux_[DAICSP_REVERBSC_MAX_SIZE];
 };
 
 
