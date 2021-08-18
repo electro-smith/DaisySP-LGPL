@@ -72,7 +72,12 @@ class SpectralAnalyzer
               SPECTRAL_WINDOW window_type,
               size_t          sample_rate,
               size_t          audio_block,
-              DsyFFT *fft); //pvsanalset
+              DsyFFT*         fft,
+              float*          inbuff,
+              float*          analbuf_,
+              float*          analbufOut_,
+              float*          analwinbuf_,
+              float*          oldInPhase_);
 
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
@@ -103,7 +108,10 @@ class SpectralAnalyzer
     /** Returns the estimated latency in seconds
      * 
      */
-    float GetEstimatedLatency() { return (float) (num_overlaps_ * overlap_) / sample_rate_; }
+    float GetEstimatedLatency()
+    {
+        return (float)(num_overlaps_ * overlap_) / sample_rate_;
+    }
 
     /** Check if the analyzer is ready for processing
      * 
@@ -131,9 +139,10 @@ class SpectralAnalyzer
     float  RoverTwoPi_, TwoPioverR_, Fexact_;
     float* nextIn_;
     int    nI_, Ii_, IOi_;
-    size_t    inptr_;
+    size_t inptr_;
 
-    float input_[kFFTMaxFrames];
+    //float input_[kFFTMaxFrames];
+    float* input_;
 
     // This is how we manage the input FIFO, so it's larger than a single buffer.
     float overlapbuf_[kFFTMaxOverlapBuff];
@@ -146,10 +155,14 @@ class SpectralAnalyzer
     float* input_segment_;
     float* process_segment_;
 
-    float analbuf_[kFFTMaxFloats];
-    float analbufOut_[kFFTMaxFloats];
-    float analwinbuf_[kFFTMaxWindow];
-    float oldInPhase_[kFFTMaxFloats];
+    //     float analbuf_[kFFTMaxFloats];
+    //     float analbufOut_[kFFTMaxFloats];
+    //     float analwinbuf_[kFFTMaxWindow];
+    //     float oldInPhase_[kFFTMaxFloats];
+    float* analbuf_;
+    float* analbufOut_;
+    float* analwinbuf_;
+    float* oldInPhase_;
 
     // If floats aren't enough quality, return to doubles
     // float trig_[FFT_SIZE];
@@ -161,7 +174,7 @@ class SpectralAnalyzer
     float* cosine_;
     float* sine_;
 
-    DsyFFT *fft_;
+    DsyFFT* fft_;
 
     SpectralBuffer fsig_out_;
     float          sample_rate_;

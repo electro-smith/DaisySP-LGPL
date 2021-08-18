@@ -15,7 +15,12 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
                             SPECTRAL_WINDOW window_type,
                             size_t          sample_rate,
                             size_t          audio_block,
-                            DsyFFT *fft)
+                            DsyFFT *        fft,
+                            float *         inbuff,
+                            float *         analbuf,
+                            float *         analbufOut,
+                            float *         analwinbuf,
+                            float *         oldInPhase)
 {
     status_ = STATUS::OK;
 
@@ -23,6 +28,12 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
     float  sum;
     int    halfwinsize;
     int    i, Mf /*,Lf*/;
+    /** Assign pointers for ext. buffers */
+    input_ = inbuff;
+    analbuf_ = analbuf;
+    analbufOut_ = analbufOut;
+    analwinbuf_ = analwinbuf;
+    oldInPhase_ = oldInPhase;
 
     uint32_t N       = fft_size;
     uint32_t M       = window_size;
@@ -189,7 +200,7 @@ void SpectralAnalyzer::Init(uint32_t        fft_size,
     // return OK;
 
     sample_rate_ = sample_rate;
-    fft_ = fft;
+    fft_         = fft;
     fft_->Init();
 }
 
@@ -285,7 +296,8 @@ void SpectralAnalyzer::Process(float sample)
     if(inptr_ == overlap_)
     {
         inptr_         = 0;
-        input_segment_ = (size_t) (input_segment_ - overlapbuf_) >= overlap_ * (num_overlaps_ - 1)
+        input_segment_ = (size_t)(input_segment_ - overlapbuf_)
+                                 >= overlap_ * (num_overlaps_ - 1)
                              ? overlapbuf_
                              : input_segment_ + overlap_;
         input_count_++;
@@ -307,10 +319,10 @@ SpectralBuffer &SpectralAnalyzer::ParallelProcess()
         fsig_out_.framecount++;
         fsig_out_.ready = true;
 
-        process_segment_
-            = (size_t) (process_segment_ - overlapbuf_) >= overlap_ * (num_overlaps_ - 1)
-                  ? overlapbuf_
-                  : process_segment_ + overlap_;
+        process_segment_ = (size_t)(process_segment_ - overlapbuf_)
+                                   >= overlap_ * (num_overlaps_ - 1)
+                               ? overlapbuf_
+                               : process_segment_ + overlap_;
     }
     else
     {

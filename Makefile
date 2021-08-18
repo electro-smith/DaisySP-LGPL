@@ -67,7 +67,7 @@ CPP_SOURCES += $(addsuffix .cpp, $(MODULE_DIR)/$(UTILITY_MOD_DIR)/$(UTILITY_MODU
 # building variables
 ######################################
 # debug build?
-#DEBUG = 0
+DEBUG = 0
 # optimization
 # OPT = -O0
 # OPT = -O3

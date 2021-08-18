@@ -12,7 +12,7 @@ namespace daicsp
 // memory footprint, simply define `__FFT_SIZE__` before including
 // daicsp
 #ifndef __FFT_SIZE__
-#define __FFT_SIZE__ 4096 
+#define __FFT_SIZE__ 4096
 #endif
 
 static constexpr unsigned int kFFTMaxSize        = __FFT_SIZE__;
