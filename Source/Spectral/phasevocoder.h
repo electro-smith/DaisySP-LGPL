@@ -60,7 +60,7 @@ class PhaseVocoder
     /** Retrieves a single sample from the FIFO, and
      *  queues the bulk processing when appropriate.
      */
-    float Process();
+    float Process(SpectralBuffer& fsig_in);
 
     /** Retrieves the current status. Useful for error checking.
          */
@@ -98,7 +98,7 @@ class PhaseVocoder
     size_t outptr_;
 
     float  output_[kFFTMaxFrames];
-    float  overlapbuf_[kFFTMaxOverlapBuff];
+    float  overlapbuf_[kFFTMaxOverlap];
     size_t overlap_;
     size_t num_overlaps_;
     size_t output_count_;

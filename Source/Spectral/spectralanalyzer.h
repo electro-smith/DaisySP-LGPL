@@ -82,7 +82,7 @@ class SpectralAnalyzer
     /** Writes a single sample to the FIFO, and
      *  queues the bulk processing when appropriate.
      */
-    void Process(float sample);
+    SpectralBuffer &Process(float sample);
 
     /** Processes a block of incoming audio from the FIFO,
      *  blocks until the FIFO is filled.
@@ -131,7 +131,7 @@ class SpectralAnalyzer
 
     void ProcessSliding(const float* in, size_t size); // pvssanal
 
-    void Tick(float sample); // anal_tick
+    SpectralBuffer &Tick(float sample); // anal_tick
 
     void GenerateFrame(); // generate_frame
 
@@ -145,7 +145,7 @@ class SpectralAnalyzer
     float* input_;
 
     // This is how we manage the input FIFO, so it's larger than a single buffer.
-    float overlapbuf_[kFFTMaxOverlapBuff];
+    float overlapbuf_[kFFTMaxOverlap];
     // This is the size of an individual overlap frame
     size_t overlap_;
     // This is the size of the rotating overlapbuf in terms of overlap frames

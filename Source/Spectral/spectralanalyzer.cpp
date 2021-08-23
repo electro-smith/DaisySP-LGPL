@@ -291,23 +291,36 @@ void SpectralAnalyzer::InitSliding(uint32_t        fft_size,
     // fft_.Init();
 }
 
-void SpectralAnalyzer::Process(float sample)
+SpectralBuffer &SpectralAnalyzer::Process(float sample)
 {
+    // if(inptr_ == overlap_)
+    // {
+    //     inptr_         = 0;
+    //     input_segment_ = (size_t)(input_segment_ - overlapbuf_)
+    //                              >= overlap_ * (num_overlaps_ - 1)
+    //                          ? overlapbuf_
+    //                          : input_segment_ + overlap_;
+    //     input_count_++;
+    //     if(input_count_ > num_overlaps_)
+    //     {
+    //         status_ = STATUS::W_BUFFER_UNDERFLOW;
+    //     }
+    // }
+
+    // input_segment_[inptr_++] = sample;
+
+    fsig_out_.ready = false;
     if(inptr_ == overlap_)
     {
-        inptr_         = 0;
-        input_segment_ = (size_t)(input_segment_ - overlapbuf_)
-                                 >= overlap_ * (num_overlaps_ - 1)
-                             ? overlapbuf_
-                             : input_segment_ + overlap_;
-        input_count_++;
-        if(input_count_ > num_overlaps_)
-        {
-            status_ = STATUS::W_BUFFER_UNDERFLOW;
-        }
+        GenerateFrame();
+        fsig_out_.framecount++;
+        fsig_out_.ready = true;
+        inptr_ = 0;
     }
+    //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
+    overlapbuf_[inptr_++] = sample;
 
-    input_segment_[inptr_++] = sample;
+    return fsig_out_;
 }
 
 SpectralBuffer &SpectralAnalyzer::ParallelProcess()
@@ -354,16 +367,20 @@ SpectralBuffer &SpectralAnalyzer::ParallelProcess()
 }
 
 //
-// void SpectralAnalyzer::Tick(float sample)
+// SpectralBuffer &SpectralAnalyzer::Tick(float sample)
 // {
-//     if(inptr_ == fsig_out_.overlap)
-//     {
-//         GenerateFrame();
-//         fsig_out_.framecount++;
-//         inptr_ = 0;
-//     }
-//     //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
-//     overlapbuf_[inptr_++] = sample;
+    // fsig_out_.ready = false;
+    // if(inptr_ == fsig_out_.overlap)
+    // {
+    //     GenerateFrame();
+    //     fsig_out_.framecount++;
+    //     fsig_out_.ready = true;
+    //     inptr_ = 0;
+    // }
+    // //printf("inptr_ = %d fsig_.overlap=%d\n", inptr_, fsig_.overlap);
+    // overlapbuf_[inptr_++] = sample;
+
+    // return fsig_out_;
 // }
 
 void SpectralAnalyzer::ProcessSliding(const float *in, size_t size)
@@ -676,8 +693,8 @@ void SpectralAnalyzer::GenerateFrame()
     float  rratio;
 
     got = fsig_out_.overlap; /*always assume */
-    // fp   = overlapbuf_;
-    fp   = process_segment_;
+    fp   = overlapbuf_;
+    // fp   = process_segment_;
     tocp = (got <= tempInput + buflen_ - nextIn_
                 ? got
                 : tempInput + buflen_ - nextIn_);

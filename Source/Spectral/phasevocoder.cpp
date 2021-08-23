@@ -198,23 +198,30 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
     fft_->Init(); /** double FFT init may cause problems */
 }
 
-float PhaseVocoder::Process()
+float PhaseVocoder::Process(SpectralBuffer& fsig_in)
 {
-    if(outptr_ == overlap_)
-    {
-        outptr_         = 0;
-        output_segment_ = (size_t)(output_segment_ - overlapbuf_)
-                                  >= overlap_ * (num_overlaps_ - 1)
-                              ? overlapbuf_
-                              : output_segment_ + overlap_;
-        output_count_++;
-        if(output_count_ >= num_overlaps_)
-        {
-            status_ = STATUS::W_BUFFER_UNDERFLOW;
-        }
-    }
+    // if(outptr_ == overlap_)
+    // {
+    //     outptr_         = 0;
+    //     output_segment_ = (size_t)(output_segment_ - overlapbuf_)
+    //                               >= overlap_ * (num_overlaps_ - 1)
+    //                           ? overlapbuf_
+    //                           : output_segment_ + overlap_;
+    //     output_count_++;
+    //     if(output_count_ >= num_overlaps_)
+    //     {
+    //         status_ = STATUS::W_BUFFER_UNDERFLOW;
+    //     }
+    // }
 
-    return output_segment_[outptr_++];
+    // return output_segment_[outptr_++];
+    if(fsig_in.ready)
+    {
+        GenerateFrame(fsig_in);
+        frames_processed_++;
+        outptr_ = 0;
+    }
+    return overlapbuf_[outptr_++];
 }
 
 void PhaseVocoder::ParallelProcess(SpectralBuffer &fsig_in)
@@ -322,7 +329,8 @@ void PhaseVocoder::GenerateFrame(SpectralBuffer &fsig_in)
     syn  = synbuf_;
     anal = fsig_in.frame; /* RWD MUST be 32bit */
     // output = (float *) (output.auxp);
-    outbuf    = process_segment_;
+    // outbuf    = process_segment_;
+    outbuf = overlapbuf_;
     synWindow = synwinbuf_ + synWinLen;
 
     /* reconversion: The magnitude and angle-difference-per-second in syn
