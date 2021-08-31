@@ -194,7 +194,7 @@ void PhaseVocoder::Init(SpectralBuffer &fsig_in,
     // if (!(N & (N - 1))) /* if pow of two use this */
     //   p->setup = csound->RealFFT2Setup(csound,N,FFT_INV);
     // return OK;
-
+    fft_ = fft;
     fft_->Init(); /** double FFT init may cause problems */
 }
 
