@@ -4,8 +4,8 @@ project(DAISYSP VERSION 0.0.1)
 
 add_library(DaisySP STATIC 
 Source/Control/line.cpp
-Source/Control/phasor.cpp
 Source/Dynamics/balance.cpp
+Source/Dynamics/bitcrush.cpp
 Source/Effects/fold.cpp
 Source/Effects/reverbsc.cpp
 Source/Filters/allpass.cpp

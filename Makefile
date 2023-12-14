@@ -1,4 +1,4 @@
-TARGET = libdaisysp
+TARGET = libdaisysp-lgpl
 
 MODULE_DIR = Source
 
@@ -8,8 +8,7 @@ MODULE_DIR = Source
 
 CONTROL_MOD_DIR = Control
 CONTROL_MODULES = \
-line \
-phasor \
+line
 
 DYNAMICS_MOD_DIR = Dynamics
 DYNAMICS_MODULES = \
@@ -17,6 +16,7 @@ balance \
 
 EFFECTS_MOD_DIR = Effects
 EFFECTS_MODULES = \
+bitcrush \
 fold \
 reverbsc \
 
@@ -123,13 +123,14 @@ C_DEFS =  \
 
 C_INCLUDES = \
 -I$(MODULE_DIR) \
--I$(MODULE_DIR)/../../$(UTILITY_MOD_DIR) \
+-I$(MODULE_DIR)/../../Source/ \
+-I$(MODULE_DIR)/../../Source/$(UTILITY_MOD_DIR) \
 -I$(MODULE_DIR)/$(CONTROL_MOD_DIR) \
 -I$(MODULE_DIR)/$(DYNAMICS_MOD_DIR) \
 -I$(MODULE_DIR)/$(EFFECTS_MOD_DIR) \
 -I$(MODULE_DIR)/$(FILTER_MOD_DIR) \
 -I$(MODULE_DIR)/$(SAMPLING_MOD_DIR) \
--I$(MODULE_DIR)/$(UTILITY_MOD_DIR) 
+-I$(MODULE_DIR)/$(UTILITY_MOD_DIR)
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
