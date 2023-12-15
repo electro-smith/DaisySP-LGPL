@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(DAISYSP VERSION 0.0.1)
+project(DaisySP_LGPL VERSION 0.0.1)
 
-add_library(DaisySP STATIC 
+add_library(DaisySP_LGPL STATIC 
 Source/Control/line.cpp
 Source/Dynamics/balance.cpp
-Source/Dynamics/bitcrush.cpp
+Source/Effects/bitcrush.cpp
 Source/Effects/fold.cpp
 Source/Effects/reverbsc.cpp
 Source/Filters/allpass.cpp
@@ -22,15 +22,17 @@ Source/Utility/port.cpp
 )
 
 
-set_target_properties(DaisySP PROPERTIES PUBLIC
+set_target_properties(DaisySP_LGPL PROPERTIES PUBLIC
   CXX_STANDARD 14 
   CXX_STANDARD_REQUIRED
   )
 
 
-target_include_directories(DaisySP PUBLIC
+target_include_directories(DaisySP_LGPL PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/Source
   PRIVATE
+  "../../Source"
+  "../../Source/Utility"
   "Source"
   "Source/Control"
   "Source/Dynamics"
