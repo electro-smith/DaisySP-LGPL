@@ -3,7 +3,6 @@
   DaisySP-LGPL • LGPL DSP Modules for <a href="https://www.github.com/electro-smith/DaisySP/">DaisySP</a>
 </h1>
 
-[![Build Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Build/badge.svg)](https://github.com/electro-smith/DaisySP-LGPL/actions?query=workflow%3ABuild)
 [![Style Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Style/badge.svg)](https://github.com/electro-smith/DaisySP-LPGL/actions?query=workflow%3AStyle)
 [![Documentation Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Documentation/badge.svg)](https://electro-smith.github.io/DaisySP-LGPL/index.html)
 ![Discord](https://img.shields.io/discord/1037767234803740694?logo=discord&label=Discord)
