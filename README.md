@@ -1,6 +1,6 @@
 <h1>
   <img width=3% src="https://raw.githubusercontent.com/electro-smith/daisysp/master/resources/assets/banner.png">
-  DaisySP-LGPL • LGPL Licensed DSP Modules for <a href="https://www.github.com/electro-smith/DaisySP/">DaisySP</a>
+  DaisySP-LGPL • LGPL DSP Modules for <a href="https://www.github.com/electro-smith/DaisySP/">DaisySP</a>
 </h1>
 
 [![Build Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Build/badge.svg)](https://github.com/electro-smith/DaisySP-LGPL/actions?query=workflow%3ABuild)
