@@ -8,9 +8,9 @@ void Biquad::Reset()
 {
     float con   = cutoff_ * two_pi_d_sr_;
     float alpha = 1.0f - 2.0f * res_ * cosf(con) * cosf(con)
-                  + res_ * res_ * cosf(2 * con);
-    float beta  = 1.0f + cosf(con);
-    float gamma = 1 + cosf(con);
+                  + res_ * res_ * cosf(2.f * con);
+    float beta  = res_ * res_ * sinf(2.f * con) - 2.f * res_ * cosf(con) * sinf(con);
+    float gamma = 1.f + cosf(con);
     float m1    = alpha * gamma + beta * sinf(con);
     float m2    = alpha * gamma - beta * sinf(con);
     float den   = sqrtf(m1 * m1 + m2 * m2);
@@ -19,7 +19,7 @@ void Biquad::Reset()
     b1_ = b0_;
     b2_ = 0.0f;
     a0_ = 1.0f;
-    a1_ = -2.0 * res_ * cosf(con);
+    a1_ = -2.0f * res_ * cosf(con);
     a2_ = res_ * res_;
 }
 
@@ -28,8 +28,8 @@ void Biquad::Init(float sample_rate)
     sample_rate_ = sample_rate;
     two_pi_d_sr_ = TWOPI_F / sample_rate_;
 
-    cutoff_ = 500;
-    res_    = 0.7;
+    cutoff_ = 500.f;
+    res_    = 0.7f;
 
     Reset();
 
