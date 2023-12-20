@@ -10,17 +10,14 @@ float MoogLadder::my_tanh(float x)
     {
         sign = -1;
         x    = -x;
-        return x * sign;
     }
-    else if(x >= 4.0f)
+    if(x >= 4.0)
     {
         return sign;
     }
-    else if(x < 0.5f)
-    {
+    if(x < 0.5)
         return x * sign;
-    }
-    return sign * tanhf(x);
+    return sign * tanh(x);
 }
 
 void MoogLadder::Init(float sample_rate)

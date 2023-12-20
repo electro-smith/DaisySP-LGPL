@@ -9,7 +9,8 @@ void Biquad::Reset()
     float con   = cutoff_ * two_pi_d_sr_;
     float alpha = 1.0f - 2.0f * res_ * cosf(con) * cosf(con)
                   + res_ * res_ * cosf(2.f * con);
-    float beta  = res_ * res_ * sinf(2.f * con) - 2.f * res_ * cosf(con) * sinf(con);
+    float beta
+        = res_ * res_ * sinf(2.f * con) - 2.f * res_ * cosf(con) * sinf(con);
     float gamma = 1.f + cosf(con);
     float m1    = alpha * gamma + beta * sinf(con);
     float m2    = alpha * gamma - beta * sinf(con);
