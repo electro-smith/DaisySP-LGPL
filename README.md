@@ -20,11 +20,9 @@ Any contributions to this library are welcome under the same guidelines as Daisy
 
 ## License
 
-DaisySP uses the MIT license.
+DaisySP-LGPL uses the LGPL-2.1 license.
 
-It can be used in both closed source and commercial projects, and does not provide a warranty of any kind.
-
-For the full license, read the [LICENSE](https://github.com/electro-smith/DaisySP/blob/master/LICENSE) file in the root directory.
+For the full license, read the [LICENSE](https://github.com/electro-smith/DaisySP-LGPL/blob/master/LICENSE) file in the root directory.
 
 ## Distribution
 If you distribute code that makes use of DaisySP-LGPL, you are obligated to give end users the option to recompile with the LGPL components having been replaced.
