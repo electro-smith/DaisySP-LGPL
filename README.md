@@ -1,7 +1,7 @@
-<h1>
-  <img width=3% src="https://raw.githubusercontent.com/electro-smith/daisysp/master/resources/assets/banner.png">
-  DaisySP-LGPL • LGPL DSP Modules for <a href="https://www.github.com/electro-smith/DaisySP/">DaisySP</a>
-</h1>
+<div align=center>
+<img width=15% src="https://raw.githubusercontent.com/electro-smith/daisysp/master/resources/assets/banner.png">
+
+# DaisySP-LGPL • LGPL DSP Modules for [DaisySP](https://www.github.com/electro-smith/DaisySP/)
 
 [![Style Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Style/badge.svg)](https://github.com/electro-smith/DaisySP-LPGL/actions?query=workflow%3AStyle)
 [![Documentation Badge](https://github.com/electro-smith/DaisySP-LGPL/workflows/Documentation/badge.svg)](https://electro-smith.github.io/DaisySP-LGPL/index.html)
@@ -11,27 +11,31 @@
 
 > DaisySP-LGPL is a set of LGPL licensed DSP (Digital Signal Processing) modules for use in the DaisySP library.
 
-## DaisySP and Contribution
+</div>
+<br>
+
+## 🧐 DaisySP and Contribution
 
 This is not a standalone library, and requires [DaisySP](https://www.github.com/electro-smith/DaisySP) to work properly.
 
 Any contributions to this library are welcome under the same guidelines as DaisySP.
 
-## License
+## ⚠️ License
 
 DaisySP-LGPL uses the LGPL-2.1 license.
 
 For the full license, read the [LICENSE](https://github.com/electro-smith/DaisySP-LGPL/blob/master/LICENSE) file in the root directory.
 
-## Distribution
+## ✉️ Distribution
 If you distribute code that makes use of DaisySP-LGPL, you are obligated to give end users the option to recompile with the LGPL components having been replaced.
 
-To make this easier, we have provided a script called [gather_lgpl.sh](https://github.com/electro-smith/libDaisy/tree/master/core/gather_lgpl.sh) which can gather the required files with a simple build system for that purpose.
+To make this easier, we have provided a script called [gather_lgpl.sh](https://github.com/electro-smith/DaisySP-LGPL/tree/master/distribution/gather_lgpl.sh) which can gather the required files with a simple build system for that purpose.
 
-1. From your project directory run `<LIBDAISY_DIR>/core/gather_lgpl.sh <PROJECT_NAME>`
+1. From your project directory run `<DAISYSP-LGPL_DIR>/distribution/gather_lgpl.sh <PROJECT_NAME>`
 2. Use the `-l` and `-d` flags to override the default libDaisy and DaisySP locations.
-3. A standalone `lgpl` folder will be created containing:
+3. A standalone `distribution` folder will be created containing:
     - A Readme
+    - The LICENSE file(s)
     - A standalone Makefile
     - And any relevant build files under a `resources` folder.
-4. End users with the `lgpl` folder can relink from source with their own modified copy of `libdaisy-lgpl.a` by replacing that file in the `resources` folder, and running `make`
+4. End users with the `distribution` folder can relink from source with their own modified copy of `libdaisy-lgpl.a` by replacing that file in the `resources` folder, and running `make`.
