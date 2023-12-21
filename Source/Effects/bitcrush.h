@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Paul Batchelor
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_BITCRUSH_H
 #define DSY_BITCRUSH_H
@@ -7,12 +15,7 @@
 
 namespace daisysp
 {
-/** bitcrush module
-
-Original author(s) : Paul Batchelor, 
-
-Ported from soundpipe by Ben Sergentanis, May 2020
-*/
+/** Bitcrush module */
 class Bitcrush
 {
   public:

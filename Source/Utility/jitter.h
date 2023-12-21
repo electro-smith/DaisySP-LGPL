@@ -1,19 +1,18 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Paul Batchelor, Gabriel Maldonado
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DAISY_JITTER
 #define DAISY_JITTER
 
 namespace daisysp
 {
-/** Randomly segmented line generator \n 
-    Originally extracted from csound by Paul Batchelor.\n 
-    Ported by Ben Sergentanis, June 2020
-
-    @author Gabriel Maldonado
-
-    @year 1998
-
-    Location: Opcodes/uggab.c (csound)
-*/
+/** Randomly segmented line generator */
 class Jitter
 {
   public:

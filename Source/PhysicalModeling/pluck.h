@@ -1,3 +1,10 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John ffitch
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
 
 #pragma once
 #ifndef DSY_PLUCK_H
@@ -19,17 +26,7 @@ enum
     PLUCK_LAST,
 };
 
-/** Produces a naturally decaying plucked string or drum sound based on the Karplus-Strong algorithms.
-
-    Ported from soundpipe to DaisySP
-    
-    This code was originally extracted from the Csound opcode "pluck"
-
-    Original Author(s): Barry Vercoe, John ffitch
-    Year: 1991
-
-    Location: OOps/ugens4.c
-    */
+/** Produces a naturally decaying plucked string or drum sound based on the Karplus-Strong algorithms. */
 class Pluck
 {
   public:

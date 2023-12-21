@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John ffitch, Jens Groh, Hans Mikelson, Istvan Varga
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_COMB_H
 #define DSY_COMB_H
@@ -7,12 +15,7 @@
 
 namespace daisysp
 {
-/** Comb filter module
-
-    Original author(s) :
-
-    Ported from soundpipe by Ben Sergentanis, May 2020
-*/
+/** Comb filter module */
 class Comb
 {
   public:

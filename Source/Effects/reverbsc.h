@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Sean Costello, Istvan Varga, Paul Batchelor
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSYSP_REVERBSC_H
 #define DSYSP_REVERBSC_H
@@ -22,18 +30,7 @@ typedef struct
     float *buf;               /**< buffer ptr */
 } ReverbScDl;
 
-/** Stereo Reverb
-
-Reverb SC:               Ported from csound/soundpipe
-
-Original author(s):        Sean Costello, Istvan Varga
-
-Year:                    1999, 2005
-
-Ported to soundpipe by:  Paul Batchelor
-
-Ported by:                Stephen Hensley
-*/
+/** Stereo Reverb */
 class ReverbSc
 {
   public:

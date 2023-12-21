@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, John FFitch, Gabriel Maldonado
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_FOLD_H
 #define DSY_FOLD_H
@@ -7,14 +15,7 @@
 
 namespace daisysp
 {
-/** fold module
-
-Original author(s) : John FFitch, Gabriel Maldonado
-
-Year : 1998
-
-Ported from soundpipe by Ben Sergentanis, May 2020
-*/
+/** Fold module */
 class Fold
 {
   public:

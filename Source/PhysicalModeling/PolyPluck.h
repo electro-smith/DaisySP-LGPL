@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_POLYPLUCK_H
 #define DSY_POLYPLUCK_H

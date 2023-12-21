@@ -1,21 +1,18 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Francois Blanc, Steven Yi, Paul Batchelor
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DAISY_MODE
 #define DAISY_MODE
 
 namespace daisysp
 {
-/** Resonant Modal Filter
-
-    Extracted from soundpipe to work as a Daisy Module,
-
-    originally extracted from csound by Paul Batchelor.
-
-    Original Author(s): Francois Blanc, Steven Yi
-
-    Year: 2001
-
-    Location: Opcodes/biquad.c (csound)
-*/
+/** Resonant Modal Filter */
 class Mode
 {
   public:

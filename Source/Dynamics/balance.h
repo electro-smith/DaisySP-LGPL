@@ -1,3 +1,10 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, john ffitch, Gabriel Maldonado
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
 
 #pragma once
 #ifndef DSY_BALANCE_H
@@ -8,14 +15,7 @@
 
 namespace daisysp
 {
-/** Balances two sound sources. Sig is boosted to the level of comp.
-
-    *Original author(s) : Barry Vercoe, john ffitch, Gabriel Maldonado
-
-    *Year: 1991
-
-    *Ported from soundpipe by Ben Sergentanis, May 2020
-*/
+/** Balances two sound sources. Sig is boosted to the level of comp. */
 class Balance
 {
   public:

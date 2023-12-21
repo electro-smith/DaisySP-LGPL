@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, John ffitch, Richard Dobson
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_NLFILT_H
 #define DSY_NLFILT_H
@@ -7,10 +15,7 @@
 
 namespace daisysp
 {
-/** Non-linear filter
-    
-    port by: Stephen Hensley, December 2019
-    
+/** Non-linear filter    
     The four 5-coefficients: a, b, d, C, and L are used to configure different filter types.
 
     Structure for Dobson/Fitch nonlinear filter 
@@ -21,11 +26,6 @@ namespace daisysp
 
     Though traditional filter types can be made, 
     the effect will always respond differently to different input.
-
-    This Source is a heavily modified version of the original
-    source from Csound.
-
-    \todo make this work on a single sample instead of just on blocks at a time.
     */
 class NlFilt
 {

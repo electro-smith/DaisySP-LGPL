@@ -1,3 +1,10 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Robbin Whittle, John ffitch, Paul Batchelor
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
 
 #pragma once
 #ifndef DSY_PORT_H
@@ -13,15 +20,6 @@ move towards that value at a rate determined by ihtim. ihtim is the half-time of
 function (in seconds), during which the curve will traverse half the distance towards the new value, 
 then half as much again, etc., theoretically never reaching its asymptote.
 
-This code has been ported from Soundpipe to DaisySP by Paul Batchelor. 
-
-The Soundpipe module was extracted from the Csound opcode "portk".
-
-Original Author(s): Robbin Whittle, John ffitch
-
-Year: 1995, 1998
-
-Location: Opcodes/biquad.c
 */
 class Port
 {

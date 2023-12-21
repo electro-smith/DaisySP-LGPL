@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Victor Lazzarini, John ffitch (fast tanh), Bob Moog
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_MOOGLADDER_H
 #define DSY_MOOGLADDER_H
@@ -7,13 +15,7 @@
 
 namespace daisysp
 {
-/** Moog ladder filter module
-
-Ported from soundpipe
-
-Original author(s) : Victor Lazzarini, John ffitch (fast tanh), Bob Moog
-
-*/
+/** Moog ladder filter module*/
 class MoogLadder
 {
   public:

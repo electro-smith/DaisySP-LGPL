@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John FFitch, Gabriel Maldonado
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_ATONE_H
 #define DSY_ATONE_H
@@ -7,15 +15,7 @@
 
 namespace daisysp
 {
-/** A first-order recursive high-pass filter with variable frequency response.
-     Original Author(s): Barry Vercoe, John FFitch, Gabriel Maldonado
-
-     Year: 1991
-
-     Original Location: Csound -- OOps/ugens5.c
-
-     Ported from soundpipe by Ben Sergentanis, May 2020
-    */
+/** A first-order recursive high-pass filter with variable frequency response. */
 class ATone
 {
   public:

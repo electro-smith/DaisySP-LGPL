@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John FFitch, Gabriel Maldonado
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_TONE_H
 #define DSY_TONE_H
@@ -7,8 +15,7 @@
 
 namespace daisysp
 {
-/** A first-order recursive low-pass filter with variable frequency response.
-*/
+/** A first-order recursive low-pass filter with variable frequency response. */
 class Tone
 {
   public:

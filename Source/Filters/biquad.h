@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Hans Mikelson, Matt Gerassimoff, John ffitch, Steven Yi
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_BIQUAD_H
 #define DSY_BIQUAD_H
@@ -7,14 +15,7 @@
 
 namespace daisysp
 {
-/** Two pole recursive filter
-
-    Original author(s) : Hans Mikelson
-
-    Year: 1998
-
-    Ported from soundpipe by Ben Sergentanis, May 2020
-*/
+/** Two pole recursive filter */
 class Biquad
 {
   public:

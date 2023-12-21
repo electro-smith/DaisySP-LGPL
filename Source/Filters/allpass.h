@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John ffitch
+
+Use of this source code is governed by the LGPL V2.1
+license that can be found in the LICENSE file or at
+https://opensource.org/license/lgpl-2-1/
+*/
+
 #pragma once
 #ifndef DSY_ALLPASS_H
 #define DSY_ALLPASS_H
@@ -14,9 +22,6 @@ namespace daisysp
 /**  
        Allpass filter module \n 
        Passes all frequencies at their original levels, with a phase shift. \n 
-       Ported from soundpipe by Ben Sergentanis, May 2020 
-       @author Barry Vercoe, John ffitch
-       @date 1991
 */
 class Allpass
 {
