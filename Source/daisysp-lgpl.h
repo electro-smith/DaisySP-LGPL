@@ -7,6 +7,7 @@
 
 /** Dynamics Modules */
 #include "Dynamics/balance.h"
+#include "Dynamics/compressor.h"
 
 /** Effects Modules */
 #include "Effects/bitcrush.h"
@@ -26,6 +27,9 @@
 /** Physical Modeling Modules */
 #include "PhysicalModeling/pluck.h"
 #include "PhysicalModeling/PolyPluck.h"
+
+/** Synthesis Modules */
+#include "Synthesis/blosc.h"
 
 /** Utility Modules */
 #include "Utility/jitter.h"

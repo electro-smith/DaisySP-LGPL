@@ -5,6 +5,7 @@ project(DaisySP_LGPL VERSION 0.0.1)
 add_library(DaisySP_LGPL STATIC 
 Source/Control/line.cpp
 Source/Dynamics/balance.cpp
+Source/Dynamics/compressor.cpp
 Source/Effects/bitcrush.cpp
 Source/Effects/fold.cpp
 Source/Effects/reverbsc.cpp
@@ -17,6 +18,7 @@ Source/Filters/moogladder.cpp
 Source/Filters/nlfilt.cpp
 Source/Filters/tone.cpp
 Source/PhysicalModeling/pluck.cpp
+Source/Synthesis/blosc.cpp
 Source/Utility/jitter.cpp
 Source/Utility/port.cpp
 )
@@ -39,5 +41,6 @@ target_include_directories(DaisySP_LGPL PUBLIC
   "Source/Effects"
   "Source/Filters"
   "Source/PhysicalModeling"
+  "Source/Synthesis"
   "Source/Utility"
   )
