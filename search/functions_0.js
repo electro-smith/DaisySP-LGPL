@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['clear_0',['Clear',['../classdaisysp_1_1_mode.html#a021a7739c22c3848f988cee7fd20f9ab',1,'daisysp::Mode']]]
+  ['apply_0',['Apply',['../classdaisysp_1_1_compressor.html#a0f75f6a1d127db30cdbccec09254f997',1,'daisysp::Compressor']]],
+  ['automakeup_1',['AutoMakeup',['../classdaisysp_1_1_compressor.html#a0bf3732454e2ccc80c0ab4772a68ef38',1,'daisysp::Compressor']]]
 ];

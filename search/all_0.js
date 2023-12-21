@@ -4,5 +4,7 @@ var searchData=
   ['allpass_1',['Allpass',['../classdaisysp_1_1_allpass.html',1,'daisysp']]],
   ['allpass_2eh_2',['allpass.h',['../allpass_8h.html',1,'']]],
   ['and_20contribution_3',['🧐 DaisySP and Contribution',['../index.html#autotoc_md1',1,'']]],
-  ['atone_4',['ATone',['../classdaisysp_1_1_a_tone.html',1,'daisysp']]]
+  ['apply_4',['Apply',['../classdaisysp_1_1_compressor.html#a0f75f6a1d127db30cdbccec09254f997',1,'daisysp::Compressor']]],
+  ['atone_5',['ATone',['../classdaisysp_1_1_a_tone.html',1,'daisysp']]],
+  ['automakeup_6',['AutoMakeup',['../classdaisysp_1_1_compressor.html#a0bf3732454e2ccc80c0ab4772a68ef38',1,'daisysp::Compressor']]]
 ];
