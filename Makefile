@@ -13,6 +13,7 @@ line
 DYNAMICS_MOD_DIR = Dynamics
 DYNAMICS_MODULES = \
 balance \
+compressor \
 
 EFFECTS_MOD_DIR = Effects
 EFFECTS_MODULES = \
