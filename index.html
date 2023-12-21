@@ -72,33 +72,36 @@ $(function() {
   <div class="headertitle"><div class="title">DaisySP </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md__r_e_a_d_m_e"></a> </p><h1><img src="https://raw.githubusercontent.com/electro-smith/daisysp/master/resources/assets/banner.png" alt="" width="3%" class="inline"/> DaisySP-LGPL • LGPL DSP Modules for <a href="https://www.github.com/electro-smith/DaisySP/">DaisySP</a> </h1>
-<p><a href="https://github.com/electro-smith/DaisySP-LPGL/actions?query=workflow%3AStyle"><img src="https://github.com/electro-smith/DaisySP-LGPL/workflows/Style/badge.svg" alt="Style Badge" style="pointer-events: none;" class="inline"/></a> <a href="https://electro-smith.github.io/DaisySP-LGPL/index.html"><img src="https://github.com/electro-smith/DaisySP-LGPL/workflows/Documentation/badge.svg" alt="Documentation Badge" style="pointer-events: none;" class="inline"/></a> <img src="https://img.shields.io/discord/1037767234803740694?logo=discord&amp;label=Discord" alt="Discord" class="inline"/> <a href="https://forum.electro-smith.com/"><img src="https://img.shields.io/badge/chat-daisy%20forum-orange" alt="Forum Badge" class="inline"/></a> <a href="https://opensource.org/licenses/LGPL"><img src="https://img.shields.io/badge/license-LGPL-yellow" alt="License Badge" class="inline"/></a></p>
-<blockquote class="doxtable">
+<div class="textblock"><p><a class="anchor" id="md__r_e_a_d_m_e"></a> </p><div align="center"> <img src="https://raw.githubusercontent.com/electro-smith/daisysp/master/resources/assets/banner.png" alt="" width="15%" class="inline"/></div><div align="center"></div><h1><a class="anchor" id="autotoc_md0"></a>
+DaisySP-LGPL • LGPL DSP Modules for &lt;a href="https://www.github.com/electro-smith/DaisySP/" &gt;DaisySP&lt;/a&gt;</h1>
+<div align="center"></div><div align="center"><a href="https://github.com/electro-smith/DaisySP-LPGL/actions?query=workflow%3AStyle"><img src="https://github.com/electro-smith/DaisySP-LGPL/workflows/Style/badge.svg" alt="Style Badge" style="pointer-events: none;" class="inline"/></a> <a href="https://electro-smith.github.io/DaisySP-LGPL/index.html"><img src="https://github.com/electro-smith/DaisySP-LGPL/workflows/Documentation/badge.svg" alt="Documentation Badge" style="pointer-events: none;" class="inline"/></a> <img src="https://img.shields.io/discord/1037767234803740694?logo=discord&amp;label=Discord" alt="Discord" class="inline"/> <a href="https://forum.electro-smith.com/"><img src="https://img.shields.io/badge/chat-daisy%20forum-orange" alt="Forum Badge" class="inline"/></a> <a href="https://opensource.org/licenses/LGPL"><img src="https://img.shields.io/badge/license-LGPL-yellow" alt="License Badge" class="inline"/></a></div><div align="center"><blockquote class="doxtable">
 <p>&zwj;DaisySP-LGPL is a set of LGPL licensed DSP (Digital Signal Processing) modules for use in the DaisySP library. </p>
 </blockquote>
-<h2><a class="anchor" id="autotoc_md0"></a>
-DaisySP and Contribution</h2>
+</div><p> <br  />
+</p>
+<h2><a class="anchor" id="autotoc_md1"></a>
+🧐 DaisySP and Contribution</h2>
 <p>This is not a standalone library, and requires <a href="https://www.github.com/electro-smith/DaisySP">DaisySP</a> to work properly.</p>
 <p>Any contributions to this library are welcome under the same guidelines as DaisySP.</p>
-<h2><a class="anchor" id="autotoc_md1"></a>
-License</h2>
+<h2><a class="anchor" id="autotoc_md2"></a>
+⚠️ License</h2>
 <p>DaisySP-LGPL uses the LGPL-2.1 license.</p>
 <p>For the full license, read the <a href="https://github.com/electro-smith/DaisySP-LGPL/blob/master/LICENSE">LICENSE</a> file in the root directory.</p>
-<h2><a class="anchor" id="autotoc_md2"></a>
-Distribution</h2>
+<h2><a class="anchor" id="autotoc_md3"></a>
+✉️ Distribution</h2>
 <p>If you distribute code that makes use of DaisySP-LGPL, you are obligated to give end users the option to recompile with the LGPL components having been replaced.</p>
-<p>To make this easier, we have provided a script called <a href="https://github.com/electro-smith/libDaisy/tree/master/core/gather_lgpl.sh">gather_lgpl.sh</a> which can gather the required files with a simple build system for that purpose.</p>
+<p>To make this easier, we have provided a script called <a href="https://github.com/electro-smith/DaisySP-LGPL/tree/master/distribution/gather_lgpl.sh">gather_lgpl.sh</a> which can gather the required files with a simple build system for that purpose.</p>
 <ol type="1">
-<li>From your project directory run <code>&lt;LIBDAISY_DIR&gt;/core/gather_lgpl.sh &lt;PROJECT_NAME&gt;</code></li>
+<li>From your project directory run <code>&lt;DAISYSP-LGPL_DIR&gt;/distribution/gather_lgpl.sh &lt;PROJECT_NAME&gt;</code></li>
 <li>Use the <code>-l</code> and <code>-d</code> flags to override the default libDaisy and DaisySP locations.</li>
-<li>A standalone <code>lgpl</code> folder will be created containing:<ul>
+<li>A standalone <code>distribution</code> folder will be created containing:<ul>
 <li>A Readme</li>
+<li>The LICENSE file(s)</li>
 <li>A standalone Makefile</li>
 <li>And any relevant build files under a <code>resources</code> folder.</li>
 </ul>
 </li>
-<li>End users with the <code>lgpl</code> folder can relink from source with their own modified copy of <code>libdaisy-lgpl.a</code> by replacing that file in the <code>resources</code> folder, and running <code>make</code> </li>
+<li>End users with the <code>distribution</code> folder can relink from source with their own modified copy of <code>libdaisy-lgpl.a</code> by replacing that file in the <code>resources</code> folder, and running <code>make</code>. </li>
 </ol>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
