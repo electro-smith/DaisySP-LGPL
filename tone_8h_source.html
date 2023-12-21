@@ -81,49 +81,57 @@ $(document).ready(function() { init_codefold(0); });
   <div class="headertitle"><div class="title">tone.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#ifndef DSY_TONE_H</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#define DSY_TONE_H</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span>daisysp</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>{</div>
-<div class="foldopen" id="foldopen00012" data-start="{" data-end="};">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html">   12</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_tone.html">Tone</a></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>{</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <a class="code hl_class" href="classdaisysp_1_1_tone.html">Tone</a>() {}</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <a class="code hl_class" href="classdaisysp_1_1_tone.html">~Tone</a>() {}</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#aa08657c8c54ea1bf8b8f54b6cc2f6661">Init</a>(<span class="keywordtype">float</span> sample_rate);</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#a6e9ecb6756efdcf4db0221f0768d39ad">Process</a>(<span class="keywordtype">float</span> in);</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="foldopen" id="foldopen00032" data-start="{" data-end="}">
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">   32</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">SetFreq</a>(<span class="keywordtype">float</span> freq)</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        freq_ = freq;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        CalculateCoefficients();</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">Copyright (c) 2023 Electrosmith, Corp, Barry Vercoe, John FFitch, Gabriel Maldonado</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"></span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">Use of this source code is governed by the LGPL V2.1</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">license that can be found in the LICENSE file or at</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">https://opensource.org/license/lgpl-2-1/</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#ifndef DSY_TONE_H</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define DSY_TONE_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span>daisysp</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_tone.html">Tone</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>{</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="classdaisysp_1_1_tone.html">Tone</a>() {}</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="classdaisysp_1_1_tone.html">~Tone</a>() {}</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#aa08657c8c54ea1bf8b8f54b6cc2f6661">Init</a>(<span class="keywordtype">float</span> sample_rate);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#a6e9ecb6756efdcf4db0221f0768d39ad">Process</a>(<span class="keywordtype">float</span> in);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">   39</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">SetFreq</a>(<span class="keywordtype">float</span> freq)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        freq_ = freq;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        CalculateCoefficients();</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
 </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">   41</a></span>    <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">GetFreq</a>() { <span class="keywordflow">return</span> freq_; }</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">void</span>  CalculateCoefficients();</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">float</span> out_, prevout_, in_, freq_, c1_, c2_, sample_rate_;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>};</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">   48</a></span>    <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">GetFreq</a>() { <span class="keywordflow">return</span> freq_; }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordtype">void</span>  CalculateCoefficients();</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">float</span> out_, prevout_, in_, freq_, c1_, c2_, sample_rate_;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
 </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>} <span class="comment">// namespace daisysp</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassdaisysp_1_1_tone_html"><div class="ttname"><a href="classdaisysp_1_1_tone.html">daisysp::Tone</a></div><div class="ttdef"><b>Definition</b> tone.h:13</div></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>} <span class="comment">// namespace daisysp</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassdaisysp_1_1_tone_html"><div class="ttname"><a href="classdaisysp_1_1_tone.html">daisysp::Tone</a></div><div class="ttdef"><b>Definition</b> tone.h:20</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_tone_html_a6e9ecb6756efdcf4db0221f0768d39ad"><div class="ttname"><a href="classdaisysp_1_1_tone.html#a6e9ecb6756efdcf4db0221f0768d39ad">daisysp::Tone::Process</a></div><div class="ttdeci">float Process(float in)</div><div class="ttdef"><b>Definition</b> tone.cpp:16</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_tone_html_aa08657c8c54ea1bf8b8f54b6cc2f6661"><div class="ttname"><a href="classdaisysp_1_1_tone.html#aa08657c8c54ea1bf8b8f54b6cc2f6661">daisysp::Tone::Init</a></div><div class="ttdeci">void Init(float sample_rate)</div><div class="ttdef"><b>Definition</b> tone.cpp:7</div></div>
-<div class="ttc" id="aclassdaisysp_1_1_tone_html_aa2aaa42e5d6c89066e2bd9ed37a1acff"><div class="ttname"><a href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">daisysp::Tone::GetFreq</a></div><div class="ttdeci">float GetFreq()</div><div class="ttdef"><b>Definition</b> tone.h:41</div></div>
-<div class="ttc" id="aclassdaisysp_1_1_tone_html_ab42464d70a048f206b251a5f21a94c3b"><div class="ttname"><a href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">daisysp::Tone::SetFreq</a></div><div class="ttdeci">void SetFreq(float freq)</div><div class="ttdef"><b>Definition</b> tone.h:32</div></div>
+<div class="ttc" id="aclassdaisysp_1_1_tone_html_aa2aaa42e5d6c89066e2bd9ed37a1acff"><div class="ttname"><a href="classdaisysp_1_1_tone.html#aa2aaa42e5d6c89066e2bd9ed37a1acff">daisysp::Tone::GetFreq</a></div><div class="ttdeci">float GetFreq()</div><div class="ttdef"><b>Definition</b> tone.h:48</div></div>
+<div class="ttc" id="aclassdaisysp_1_1_tone_html_ab42464d70a048f206b251a5f21a94c3b"><div class="ttname"><a href="classdaisysp_1_1_tone.html#ab42464d70a048f206b251a5f21a94c3b">daisysp::Tone::SetFreq</a></div><div class="ttdeci">void SetFreq(float freq)</div><div class="ttdef"><b>Definition</b> tone.h:39</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

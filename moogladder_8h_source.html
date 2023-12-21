@@ -81,43 +81,51 @@ $(document).ready(function() { init_codefold(0); });
   <div class="headertitle"><div class="title">moogladder.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#ifndef DSY_MOOGLADDER_H</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#define DSY_MOOGLADDER_H</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span>daisysp</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>{</div>
-<div class="foldopen" id="foldopen00017" data-start="{" data-end="};">
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html">   17</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">MoogLadder</a></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>{</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">MoogLadder</a>() {}</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">~MoogLadder</a>() {}</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a60850f945fb17df64289104aa770f46f">Init</a>(<span class="keywordtype">float</span> sample_rate);</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a1bf4e2471514d240f7940b2366110a77">Process</a>(<span class="keywordtype">float</span> in);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">   37</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">SetFreq</a>(<span class="keywordtype">float</span> freq) { freq_ = freq; }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">   41</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">SetRes</a>(<span class="keywordtype">float</span> res) { res_ = res; }</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">float</span> istor_, res_, freq_, delay_[6], tanhstg_[3], old_freq_, old_res_,</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        sample_rate_, old_acr_, old_tune_;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">float</span> my_tanh(<span class="keywordtype">float</span> x);</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>};</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">Copyright (c) 2023 Electrosmith, Corp, Victor Lazzarini, John ffitch (fast tanh), Bob Moog</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"></span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">Use of this source code is governed by the LGPL V2.1</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">license that can be found in the LICENSE file or at</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">https://opensource.org/license/lgpl-2-1/</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#ifndef DSY_MOOGLADDER_H</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define DSY_MOOGLADDER_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span>daisysp</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">MoogLadder</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>{</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">MoogLadder</a>() {}</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="classdaisysp_1_1_moog_ladder.html">~MoogLadder</a>() {}</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a60850f945fb17df64289104aa770f46f">Init</a>(<span class="keywordtype">float</span> sample_rate);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a1bf4e2471514d240f7940b2366110a77">Process</a>(<span class="keywordtype">float</span> in);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">   39</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">SetFreq</a>(<span class="keywordtype">float</span> freq) { freq_ = freq; }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">   43</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">SetRes</a>(<span class="keywordtype">float</span> res) { res_ = res; }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">float</span> istor_, res_, freq_, delay_[6], tanhstg_[3], old_freq_, old_res_,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        sample_rate_, old_acr_, old_tune_;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">float</span> my_tanh(<span class="keywordtype">float</span> x);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>};</div>
 </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>} <span class="comment">// namespace daisysp</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html">daisysp::MoogLadder</a></div><div class="ttdef"><b>Definition</b> moogladder.h:18</div></div>
-<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a1be3a97d1d55afd9bf33d4e80477db4c"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">daisysp::MoogLadder::SetFreq</a></div><div class="ttdeci">void SetFreq(float freq)</div><div class="ttdef"><b>Definition</b> moogladder.h:37</div></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>} <span class="comment">// namespace daisysp</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html">daisysp::MoogLadder</a></div><div class="ttdef"><b>Definition</b> moogladder.h:20</div></div>
+<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a1be3a97d1d55afd9bf33d4e80477db4c"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a1be3a97d1d55afd9bf33d4e80477db4c">daisysp::MoogLadder::SetFreq</a></div><div class="ttdeci">void SetFreq(float freq)</div><div class="ttdef"><b>Definition</b> moogladder.h:39</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a1bf4e2471514d240f7940b2366110a77"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a1bf4e2471514d240f7940b2366110a77">daisysp::MoogLadder::Process</a></div><div class="ttdeci">float Process(float in)</div><div class="ttdef"><b>Definition</b> moogladder.cpp:40</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a60850f945fb17df64289104aa770f46f"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a60850f945fb17df64289104aa770f46f">daisysp::MoogLadder::Init</a></div><div class="ttdeci">void Init(float sample_rate)</div><div class="ttdef"><b>Definition</b> moogladder.cpp:23</div></div>
-<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a862536b54c667a620f7971772fc70548"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">daisysp::MoogLadder::SetRes</a></div><div class="ttdeci">void SetRes(float res)</div><div class="ttdef"><b>Definition</b> moogladder.h:41</div></div>
+<div class="ttc" id="aclassdaisysp_1_1_moog_ladder_html_a862536b54c667a620f7971772fc70548"><div class="ttname"><a href="classdaisysp_1_1_moog_ladder.html#a862536b54c667a620f7971772fc70548">daisysp::MoogLadder::SetRes</a></div><div class="ttdeci">void SetRes(float res)</div><div class="ttdef"><b>Definition</b> moogladder.h:43</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

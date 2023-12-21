@@ -81,41 +81,49 @@ $(document).ready(function() { init_codefold(0); });
   <div class="headertitle"><div class="title">fold.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#ifndef DSY_FOLD_H</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#define DSY_FOLD_H</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span>daisysp</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>{</div>
-<div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_fold.html">   18</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_fold.html">Fold</a></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>{</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_class" href="classdaisysp_1_1_fold.html">Fold</a>() {}</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="classdaisysp_1_1_fold.html">~Fold</a>() {}</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#accd7d1d0f0d50447255336e09d35c142">Init</a>();</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">Copyright (c) 2023 Electrosmith, Corp, John FFitch, Gabriel Maldonado</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"></span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">Use of this source code is governed by the LGPL V2.1</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">license that can be found in the LICENSE file or at</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">https://opensource.org/license/lgpl-2-1/</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#ifndef DSY_FOLD_H</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define DSY_FOLD_H</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">namespace </span>daisysp</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_fold.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classdaisysp_1_1_fold.html">Fold</a></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>{</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_class" href="classdaisysp_1_1_fold.html">Fold</a>() {}</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="classdaisysp_1_1_fold.html">~Fold</a>() {}</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#accd7d1d0f0d50447255336e09d35c142">Init</a>();</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#a61cabffbcc168a1e1887d130a191dcea">Process</a>(<span class="keywordtype">float</span> in);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#a61cabffbcc168a1e1887d130a191dcea">Process</a>(<span class="keywordtype">float</span> in);</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">   36</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">SetIncrement</a>(<span class="keywordtype">float</span> incr) { incr_ = incr; }</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">float</span> incr_, index_, value_;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">int</span>   sample_index_;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>};</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">   37</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">SetIncrement</a>(<span class="keywordtype">float</span> incr) { incr_ = incr; }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">float</span> incr_, index_, value_;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">int</span>   sample_index_;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
 </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>} <span class="comment">// namespace daisysp</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>} <span class="comment">// namespace daisysp</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassdaisysp_1_1_fold_html"><div class="ttname"><a href="classdaisysp_1_1_fold.html">daisysp::Fold</a></div><div class="ttdef"><b>Definition</b> fold.h:19</div></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassdaisysp_1_1_fold_html"><div class="ttname"><a href="classdaisysp_1_1_fold.html">daisysp::Fold</a></div><div class="ttdef"><b>Definition</b> fold.h:20</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_fold_html_a61cabffbcc168a1e1887d130a191dcea"><div class="ttname"><a href="classdaisysp_1_1_fold.html#a61cabffbcc168a1e1887d130a191dcea">daisysp::Fold::Process</a></div><div class="ttdeci">float Process(float in)</div><div class="ttdef"><b>Definition</b> fold.cpp:15</div></div>
 <div class="ttc" id="aclassdaisysp_1_1_fold_html_accd7d1d0f0d50447255336e09d35c142"><div class="ttname"><a href="classdaisysp_1_1_fold.html#accd7d1d0f0d50447255336e09d35c142">daisysp::Fold::Init</a></div><div class="ttdeci">void Init()</div><div class="ttdef"><b>Definition</b> fold.cpp:7</div></div>
-<div class="ttc" id="aclassdaisysp_1_1_fold_html_af629ac135ff9a98d58d6eaf94a3aa677"><div class="ttname"><a href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">daisysp::Fold::SetIncrement</a></div><div class="ttdeci">void SetIncrement(float incr)</div><div class="ttdef"><b>Definition</b> fold.h:36</div></div>
+<div class="ttc" id="aclassdaisysp_1_1_fold_html_af629ac135ff9a98d58d6eaf94a3aa677"><div class="ttname"><a href="classdaisysp_1_1_fold.html#af629ac135ff9a98d58d6eaf94a3aa677">daisysp::Fold::SetIncrement</a></div><div class="ttdeci">void SetIncrement(float incr)</div><div class="ttdef"><b>Definition</b> fold.h:37</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

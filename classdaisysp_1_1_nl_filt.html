@@ -102,15 +102,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac47b2f1fce4002aef5c04a523a530890"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Non-linear filter</p>
-<p>port by: Stephen Hensley, December 2019</p>
-<p>The four 5-coefficients: a, b, d, C, and L are used to configure different filter types.</p>
+<div class="textblock"><p>Non-linear filter <br  />
+ The four 5-coefficients: a, b, d, C, and L are used to configure different filter types.</p>
 <p>Structure for Dobson/Fitch nonlinear filter</p>
 <p>Revised Formula from Risto Holopainen 12 Mar 2004</p>
 <p><code>Y{n} =tanh(a Y{n-1} + b Y{n-2} + d Y^2{n-L} + X{n} - C)</code></p>
-<p>Though traditional filter types can be made, the effect will always respond differently to different input.</p>
-<p>This Source is a heavily modified version of the original source from Csound.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>make this work on a single sample instead of just on blocks at a time. </dd></dl>
+<p>Though traditional filter types can be made, the effect will always respond differently to different input. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a64e40b37f97e6f04c594abecdf29b1bd" name="a64e40b37f97e6f04c594abecdf29b1bd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a64e40b37f97e6f04c594abecdf29b1bd">&#9670;&#160;</a></span>Init()</h2>
